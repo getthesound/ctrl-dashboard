@@ -1,0 +1,2823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTRL — Label Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090e;--sf:#111117;--sf2:#191921;--bc:#232332;
+  --ac:#e8ff47;--a2:#7c5cfc;--a3:#ff4d6d;--a4:#00d4aa;--a5:#ff9f43;
+  --tx:#eff0f8;--mu:#6a6a86;
+  --ok:#00d4aa;--wa:#ffaa00;--er:#ff4d6d;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--tx);font-size:13px;overflow-x:hidden}
+.sb{position:fixed;left:0;top:0;bottom:0;width:222px;background:var(--sf);border-right:1px solid var(--bc);display:flex;flex-direction:column;z-index:100}
+.logo{padding:22px 22px 16px;border-bottom:1px solid var(--bc)}
+.logo-t{font-family:'Bebas Neue',sans-serif;font-size:29px;letter-spacing:5px;color:var(--ac);line-height:1}
+.logo-s{font-size:9px;color:var(--mu);letter-spacing:2.5px;text-transform:uppercase;margin-top:4px}
+.nav{flex:1;padding:10px 0;overflow-y:auto}
+.ns{padding:9px 22px 3px;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 22px;cursor:pointer;color:var(--mu);font-size:12px;transition:all .13s;border-left:2px solid transparent}
+.ni:hover{color:var(--tx);background:rgba(255,255,255,.02)}
+.ni.active{color:var(--ac);border-left-color:var(--ac);background:rgba(232,255,71,.04)}
+.ni svg{width:13px;height:13px;flex-shrink:0}
+.nb{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--er);color:#fff;font-size:8px;font-weight:700;margin-left:auto}
+.nb.wa{background:var(--wa)}
+.sb-foot{padding:12px 22px;border-top:1px solid var(--bc);font-size:10px;color:var(--mu)}
+.lb-gts{background:rgba(232,255,71,.1);color:var(--ac);border:1px solid rgba(232,255,71,.25)}
+.lb-echo{background:rgba(124,92,252,.12);color:var(--a2);border:1px solid rgba(124,92,252,.28)}
+.lb-avo{background:rgba(0,212,170,.1);color:var(--a4);border:1px solid rgba(0,212,170,.25)}
+.lb-kim{background:rgba(255,159,67,.1);color:var(--a5);border:1px solid rgba(255,159,67,.25)}
+.lb-wil{background:rgba(107,107,136,.1);color:var(--mu);border:1px solid rgba(107,107,136,.2)}
+.main{margin-left:222px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:11px 26px;border-bottom:1px solid var(--bc);background:var(--bg);position:sticky;top:0;z-index:50;gap:10px;flex-wrap:wrap}
+.tl{display:flex;align-items:center;gap:9px}
+.pt{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:800}
+.badge{background:var(--sf2);border:1px solid var(--bc);padding:3px 9px;border-radius:20px;font-size:10px;color:var(--mu);letter-spacing:.8px}
+.ptabs{display:flex;gap:2px;background:var(--sf);border:1px solid var(--bc);border-radius:7px;padding:3px}
+.ptab{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;color:var(--mu);transition:all .13s;font-family:'DM Mono',monospace;border:none;background:none}
+.ptab.active{background:var(--ac);color:#000;font-weight:700}
+.ptab:hover:not(.active){color:var(--tx)}
+.tr2{display:flex;align-items:center;gap:7px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;border:none;transition:all .13s}
+.btn-p{background:var(--ac);color:#000;font-weight:700}
+.btn-p:hover{background:#d4e83d}
+.btn-g{background:transparent;color:var(--mu);border:1px solid var(--bc)}
+.btn-g:hover{color:var(--tx);border-color:#555}
+.btn-s{padding:4px 9px;font-size:10px}
+select{background:var(--sf2);border:1px solid var(--bc);color:var(--tx);padding:5px 22px 5px 9px;border-radius:6px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%236a6a86'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center}
+select:focus{border-color:var(--ac)}
+input{background:var(--sf2);border:1px solid var(--bc);color:var(--tx);padding:7px 11px;border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;outline:none;width:100%;transition:border-color .13s}
+input:focus{border-color:var(--ac);outline:none}
+.content{padding:22px 26px;flex:1}
+.panel{display:none;animation:fi .26s ease}
+.panel.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* KPI */
+.kg{display:grid;gap:13px;margin-bottom:16px}
+.k4{grid-template-columns:repeat(4,1fr)}
+.k3{grid-template-columns:repeat(3,1fr)}
+.kc{background:var(--sf);border:1px solid var(--bc);border-radius:11px;padding:15px;position:relative;overflow:hidden}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--ac))}
+.kl{font-size:10px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+.kv{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1;margin-bottom:4px;color:var(--kc,var(--ac))}
+.ks{display:flex;align-items:center;gap:5px;font-size:11px}
+.ku{font-weight:600;color:var(--ok)}.kd{font-weight:600;color:var(--er)}.km{color:var(--mu)}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:15px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:15px;margin-bottom:15px}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--bc);border-radius:11px;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bc);gap:10px;flex-wrap:wrap}
+.ct{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700}
+.cs{font-size:10px;color:var(--mu);margin-top:1px}
+.cb{padding:16px}
+.ox{overflow-x:auto}
+/* SORTABLE TABLES */
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{text-align:left;padding:7px 12px;font-size:9px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--bc);background:var(--sf2);font-weight:400;cursor:pointer;user-select:none;transition:color .12s}
+th:hover{color:var(--tx)}
+th.sort-asc::after{content:' ↑';color:var(--ac);font-size:10px}
+th.sort-desc::after{content:' ↓';color:var(--ac);font-size:10px}
+th.no-sort{cursor:default}
+th.no-sort:hover{color:var(--mu)}
+td{padding:10px 12px;border-bottom:1px solid rgba(35,35,50,.5);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.012)}
+/* FILTER ROW */
+.frow th{padding:4px 6px;background:rgba(9,9,14,.6);border-bottom:1px solid var(--bc)}
+.frow th input{width:100%;padding:3px 7px;font-size:10px;height:22px;background:var(--sf2);border:1px solid var(--bc);border-radius:4px;color:var(--tx);font-family:'DM Mono',monospace}
+.frow th input:focus{border-color:var(--ac);outline:none}
+/* PILLS */
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px}
+.ps{background:rgba(0,212,170,.1);color:var(--ok);border:1px solid rgba(0,212,170,.22)}
+.pd{background:rgba(255,77,109,.1);color:var(--er);border:1px solid rgba(255,77,109,.22)}
+.pw{background:rgba(255,170,0,.1);color:var(--wa);border:1px solid rgba(255,170,0,.22)}
+.pn{background:rgba(107,107,136,.12);color:var(--mu);border:1px solid rgba(107,107,136,.18)}
+/* PROGRESS */
+.pw2{display:flex;align-items:center;gap:6px}
+.pt2{flex:1;height:4px;background:var(--sf2);border-radius:4px;overflow:hidden}
+.pf{height:100%;border-radius:4px}
+.pp{font-size:11px;min-width:34px;text-align:right;font-weight:600}
+/* REV ROW */
+.rr{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--bc)}
+.rr:last-child{border-bottom:none}
+.rdot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.rname{font-size:12px;flex:1}
+.rbar{width:90px;height:3px;background:var(--sf2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.rfill{height:100%;border-radius:3px}
+.ramt{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:70px;text-align:right}
+.rpct{font-size:10px;color:var(--mu);min-width:26px;text-align:right}
+/* ALERTS */
+.ai{display:flex;gap:10px;padding:11px 15px;border-bottom:1px solid var(--bc);align-items:flex-start;transition:background .12s;cursor:default}
+.ai:last-child{border-bottom:none}
+.ai:hover{background:rgba(255,255,255,.013)}
+.ai.unread-crit{border-left:3px solid var(--er)}
+.ai.unread-warn{border-left:3px solid var(--wa)}
+.ai.unread-ok{border-left:3px solid var(--ok)}
+.ai.unread-info{border-left:3px solid var(--a2)}
+.aico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.at{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:12px;margin-bottom:2px}
+.ad{font-size:11px;color:var(--mu)}
+.atm{font-size:10px;color:var(--mu);opacity:.6;margin-top:2px}
+.udot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:8px}
+/* HERO PROGRESS */
+.hero{background:var(--sf);border:1px solid var(--bc);border-radius:12px;padding:22px 26px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(232,255,71,.04),transparent 70%);pointer-events:none}
+.hp-lbl{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--mu);text-transform:uppercase}
+.hp-val{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--ac);letter-spacing:2px;line-height:1}
+.hp-tgt{font-size:13px;color:var(--mu);padding-bottom:7px}
+.hp-bar{height:9px;background:var(--sf2);border-radius:9px;overflow:hidden;margin-bottom:9px}
+.hp-fill{height:100%;border-radius:9px;background:linear-gradient(90deg,var(--a2),var(--ac))}
+.hp-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--mu);flex-wrap:wrap;gap:5px}
+.hp-srcs{display:flex;gap:14px;flex-wrap:wrap;margin-top:11px;padding-top:11px;border-top:1px solid var(--bc)}
+.hp-src{display:flex;align-items:center;gap:5px;font-size:11px}
+.hp-src-dot{width:8px;height:8px;border-radius:2px}
+/* PROJ */
+.proj-card{background:var(--sf);border:1px solid var(--bc);border-radius:11px;padding:18px;margin-bottom:15px}
+.scen-btn{padding:4px 10px;border-radius:5px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;border:1px solid var(--bc);background:none;color:var(--mu);transition:all .13s}
+.scen-btn.active{background:var(--a2);color:#fff;border-color:var(--a2)}
+/* MISC */
+.sd{display:flex;align-items:center;gap:9px;margin:16px 0 11px;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase}
+.sd::before,.sd::after{content:'';flex:1;height:1px;background:var(--bc)}
+.uz{border:1px dashed var(--bc);border-radius:9px;padding:24px 18px;text-align:center;cursor:pointer;transition:all .18s}
+.uz:hover{border-color:var(--ac);background:rgba(232,255,71,.02)}
+.uz-i{font-size:24px;margin-bottom:6px;opacity:.4}
+.uz-t{font-size:12px;color:var(--mu)}.uz-s{font-size:10px;color:var(--mu);opacity:.6;margin-top:2px}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.md{background:var(--sf);border:1px solid var(--bc);border-radius:13px;width:500px;max-height:88vh;overflow-y:auto;padding:24px}
+.mdt{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px}
+.mds{font-size:11px;color:var(--mu);margin-bottom:18px}
+.fl{font-size:10px;color:var(--mu);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;display:block}
+.fh{font-size:10px;color:var(--mu);opacity:.65;margin-top:3px}
+.fr{margin-bottom:12px}
+.ma{display:flex;gap:7px;justify-content:flex-end;margin-top:8px}
+.dc{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bc);gap:10px}
+.dc:last-child{border-bottom:none}
+.dn{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px}
+.dd{font-size:10px;color:var(--mu);margin-top:1px}
+.sb2{text-align:center;padding:16px;border-radius:10px;border:1px solid}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:1px;line-height:1}
+.sl{font-size:11px;color:var(--mu);margin-top:3px}
+.rn{width:22px;height:22px;border-radius:5px;background:var(--sf2);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--mu);font-weight:600}
+/* IMPORT WIZARD */
+.imp-type-card{background:var(--sf);border:2px solid var(--bc);border-radius:12px;padding:18px 14px;cursor:pointer;transition:all .18s;text-align:center}
+.imp-type-card:hover{border-color:var(--ac);background:rgba(232,255,71,.03)}
+.imp-type-card.active{border-color:var(--ac);background:rgba(232,255,71,.06)}
+.itc-icon{font-size:26px;margin-bottom:7px}
+.itc-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;margin-bottom:3px}
+.itc-sub{font-size:10px;color:var(--mu)}
+.imp-section-title{font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;color:var(--ac)}
+.dist-cards{display:grid;gap:9px}
+.dist-pick{border:1px solid var(--bc);border-radius:9px;padding:12px 14px;cursor:pointer;transition:all .16s}
+.dist-pick:hover{border-color:var(--ac);background:rgba(232,255,71,.03)}
+.dist-pick.active{border-color:var(--ac);background:rgba(232,255,71,.05)}
+.ms{display:flex;align-items:flex-start;gap:9px;padding:5px 0}
+.msd{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.msl{font-size:10px;color:var(--mu)}
+.msv{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.5px}
+.sp{color:#1DB954}.ap{color:#FC3C44}.am{color:#FF9900}.dz{color:#EF5466}
+canvas{display:block}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bc);border-radius:4px}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--sf);border:1px solid var(--ac);color:var(--ac);padding:10px 16px;border-radius:9px;font-size:12px;font-family:'DM Mono';z-index:999;display:none;box-shadow:0 8px 28px rgba(0,0,0,.55)}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader" style="position:fixed;inset:0;background:#09090e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:6px;color:#e8ff47">CTRL</div>
+  <div style="font-size:11px;color:#6a6a86;letter-spacing:2px;text-transform:uppercase" id="loader-msg">Chargement des données...</div>
+  <div style="width:200px;height:3px;background:#232332;border-radius:3px;overflow:hidden;margin-top:8px">
+    <div style="height:100%;background:linear-gradient(90deg,#7c5cfc,#e8ff47);border-radius:3px;animation:ld 1.4s ease-in-out infinite" id="loader-bar"></div>
+  </div>
+</div>
+<style>@keyframes ld{0%{width:0%;margin-left:0}50%{width:100%;margin-left:0}100%{width:0%;margin-left:100%}}</style>
+
+<!-- APP -->
+<div id="app" style="display:none;flex-direction:column;min-height:100vh;width:100%">
+
+<nav class="sb">
+  <div class="logo"><div class="logo-t">CTRL</div><div class="logo-s">Label Dashboard</div></div>
+  <div class="nav">
+    <div class="ns">Overview</div>
+    <div class="ni active" onclick="sp('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Vue globale</div>
+    <div class="ni" onclick="sp('alerts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alertes<span class="nb" id="alerts-nb">8</span></div>
+    <div class="ni" onclick="sp('streams')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Streams</div>
+    <div class="ni" onclick="sp('revenues')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Revenus</div>
+    <div class="ns">Performance</div>
+    <div class="ni" onclick="sp('tracks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Tracks<span class="nb wa">6</span></div>
+    <div class="ni" onclick="sp('artists')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Artistes</div>
+    <div class="ni" onclick="sp('labels')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Labels</div>
+    <div class="ni" onclick="sp('platforms')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Plateformes</div>
+    <div class="ns">Pilotage</div>
+    <div class="ni" onclick="sp('objectives')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Objectifs</div>
+    <div class="ni" onclick="sp('import')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import data</div>
+  </div>
+  <div class="sb-foot"><div style="margin-bottom:3px">Objectif 2026 <span style="color:var(--ac);font-weight:600">1,5M€ CA</span></div><div style="opacity:.65;font-size:9px">Believe · Tunecore · Alterk · Universal</div></div>
+</nav>
+
+<main class="main">
+  <div class="topbar">
+    <div class="tl"><div class="pt" id="page-title">Vue globale</div><span class="badge" id="period-badge">YTD 2026</span></div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <div class="ptabs" id="global-gran-tabs">
+        <button class="ptab" onclick="setGlobalGran(this,'month')">Mois</button>
+        <button class="ptab active" onclick="setGlobalGran(this,'quarter')">Quarter</button>
+        <button class="ptab" onclick="setGlobalGran(this,'year')">Année</button>
+      </div>
+      <select id="global-year-select" onchange="setGlobalYear(this.value)" style="min-width:80px">
+        <option value="all">Tout</option>
+        <option value="2026" selected>2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+        <option value="2019">2019</option>
+        <option value="2018">2018</option>
+        <option value="2017">2017</option>
+      </select>
+    </div>
+    <div class="tr2">
+      <select style="min-width:130px"><option>Tous les labels</option><option>Get The Sound</option><option>Echo</option><option>Avorio</option><option>Kimono</option><option>Willow ⏸</option></select>
+      <button class="btn btn-g btn-s" onclick="sp('import')">↑ Import</button>
+      <button class="btn btn-p btn-s" onclick="sp('import')">+ Revenu</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="panel active" id="panel-overview">
+    <div class="hero">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;gap:12px">
+        <div><div class="hp-lbl">Objectif CA 2026 — toutes sources</div>
+          <div style="display:flex;align-items:baseline;gap:10px"><div class="hp-val">€384K</div><div class="hp-tgt">/ €1 500 000</div></div></div>
+        <div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:36px;color:var(--a2)">25.6%</div>
+          <div style="font-size:10px;color:var(--mu)">atteint</div>
+          <div style="font-size:10px;color:var(--wa);margin-top:2px">Projection : €1.12M · manque €386K</div></div>
+      </div>
+      <div class="hp-bar"><div class="hp-fill" style="width:25.6%"></div></div>
+      <div class="hp-meta"><span>Jan 2026</span><span>Rythme requis : €192K/mois</span><span>10 mois restants</span></div>
+      <div class="hp-srcs">
+        <div class="hp-src"><div class="hp-src-dot" style="background:var(--ac)"></div>Streaming <strong style="color:var(--tx);margin-left:4px">€261K</strong></div>
+        <div class="hp-src"><div class="hp-src-dot" style="background:var(--a2)"></div>Publishing <strong style="color:var(--tx);margin-left:4px">€69K</strong></div>
+        <div class="hp-src"><div class="hp-src-dot" style="background:var(--a3)"></div>Sync <strong style="color:var(--tx);margin-left:4px">€35K</strong></div>
+        <div class="hp-src"><div class="hp-src-dot" style="background:var(--a4)"></div>Events <strong style="color:var(--tx);margin-left:4px">€19K</strong></div>
+      </div>
+    </div>
+    <div class="kg k4">
+      <div class="kc" style="--kc:var(--ac)"><div class="kl">Streams totaux</div><div class="kv">12.8M</div><div class="ks"><span class="ku">↑ +22%</span><span class="km">vs période préc.</span></div></div>
+      <div class="kc" style="--kc:var(--a4)"><div class="kl">CA brut YTD</div><div class="kv">€384K</div><div class="ks"><span class="ku">↑ +14%</span><span class="km">vs 2025</span></div></div>
+      <div class="kc" style="--kc:var(--a2)"><div class="kl">Tracks actives</div><div class="kv">64</div><div class="ks"><span class="ku">+8</span><span class="km">nouvelles</span></div></div>
+      <div class="kc" style="--kc:var(--er)"><div class="kl">Alertes non lues</div><div class="kv" id="ov-alert-kv">8</div><div class="ks"><span class="kd">3 critiques</span><span class="km">· <a href="#" onclick="sp('alerts');return false" style="color:var(--ac);text-decoration:none">Voir tout</a></span></div></div>
+    </div>
+    <div class="g21">
+      <div class="card">
+        <div class="ch"><div><div class="ct">Streams par distributeur</div><div class="cs">90 jours</div></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#e8ff47;display:inline-block"></span>Believe</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#7c5cfc;display:inline-block"></span>Tunecore</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#ff4d6d;display:inline-block"></span>Alterk</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#ff9f43;display:inline-block"></span>Universal</span>
+          </div>
+        </div>
+        <div class="cb"><div style="height:200px"><canvas id="streamChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">Alertes récentes</div></div><button class="btn btn-g btn-s" onclick="sp('alerts')">Tout voir →</button></div>
+        <div id="overview-alerts"></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><div><div class="ct">Revenus par source</div><div class="cs">YTD 2026</div></div></div>
+        <div class="cb" style="padding:9px 16px">
+          <div class="rr"><div class="rdot" style="background:#e8ff47"></div><div class="rname">Streaming</div><div class="rbar"><div class="rfill" style="width:68%;background:#e8ff47"></div></div><div class="ramt" style="color:#e8ff47">€261K</div><div class="rpct">68%</div></div>
+          <div class="rr"><div class="rdot" style="background:#7c5cfc"></div><div class="rname">Publishing / Droits voisins</div><div class="rbar"><div class="rfill" style="width:18%;background:#7c5cfc"></div></div><div class="ramt" style="color:#7c5cfc">€69K</div><div class="rpct">18%</div></div>
+          <div class="rr"><div class="rdot" style="background:#ff4d6d"></div><div class="rname">Sync / Licences</div><div class="rbar"><div class="rfill" style="width:9%;background:#ff4d6d"></div></div><div class="ramt" style="color:#ff4d6d">€35K</div><div class="rpct">9%</div></div>
+          <div class="rr"><div class="rdot" style="background:#00d4aa"></div><div class="rname">Events</div><div class="rbar"><div class="rfill" style="width:5%;background:#00d4aa"></div></div><div class="ramt" style="color:#00d4aa">€19K</div><div class="rpct">5%</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">Plateformes</div><div class="cs">Répartition streams</div></div></div>
+        <div class="cb"><div style="height:155px"><canvas id="platformChart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ALERTES ===== -->
+  <div class="panel" id="panel-alerts">
+    <div class="kg k4">
+      <div class="kc" style="--kc:var(--er)"><div class="kl">Critiques</div><div class="kv" id="ak-crit">3</div><div class="ks"><span class="km">action immédiate</span></div></div>
+      <div class="kc" style="--kc:var(--wa)"><div class="kl">Warnings</div><div class="kv" id="ak-warn">3</div><div class="ks"><span class="km">à surveiller</span></div></div>
+      <div class="kc" style="--kc:var(--ok)"><div class="kl">Succès</div><div class="kv" id="ak-ok">2</div><div class="ks"><span class="km">objectifs atteints</span></div></div>
+      <div class="kc" style="--kc:var(--mu)"><div class="kl">Total non lues</div><div class="kv" id="ak-unread">8</div><div class="ks"><span class="km">depuis 24h</span></div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--bc);flex-wrap:wrap">
+        <button class="btn btn-p btn-s" onclick="filterAlerts('all',this)">Toutes</button>
+        <button class="btn btn-g btn-s" onclick="filterAlerts('critical',this)" style="color:var(--er);border-color:rgba(255,77,109,.3)">Critiques</button>
+        <button class="btn btn-g btn-s" onclick="filterAlerts('warn',this)" style="color:var(--wa);border-color:rgba(255,170,0,.3)">Warnings</button>
+        <button class="btn btn-g btn-s" onclick="filterAlerts('success',this)" style="color:var(--ok);border-color:rgba(0,212,170,.3)">Succès</button>
+        <div style="margin-left:auto;display:flex;gap:7px;align-items:center">
+          <input id="alert-search" type="text" placeholder="Rechercher…" style="width:180px;height:28px;font-size:11px" oninput="renderAlerts()">
+          <button class="btn btn-g btn-s" onclick="markAllRead()">Tout marquer lu</button>
+        </div>
+      </div>
+      <div id="alerts-list"></div>
+    </div>
+  </div>
+
+  <!-- ===== STREAMS ===== -->
+  <div class="panel" id="panel-streams">
+    <!-- KPIs DSP dynamiques -->
+    <div class="kg k4" id="str-kpis">
+      <div class="kc" style="--kc:#1DB954"><div class="kl">🟢 Spotify</div><div class="kv" id="kpi-spotify">—</div><div class="ks"><span class="km" id="kpi-spotify-sub">streams</span></div></div>
+      <div class="kc" style="--kc:#EF5466"><div class="kl">🎵 Deezer</div><div class="kv" id="kpi-deezer">—</div><div class="ks"><span class="km" id="kpi-deezer-sub">streams</span></div></div>
+      <div class="kc" style="--kc:#FC3C44"><div class="kl">🍎 Apple Music</div><div class="kv" id="kpi-apple">—</div><div class="ks"><span class="km" id="kpi-apple-sub">streams</span></div></div>
+      <div class="kc" style="--kc:#FF0000"><div class="kl">▶ YouTube</div><div class="kv" id="kpi-youtube">—</div><div class="ks"><span class="km" id="kpi-youtube-sub">streams video</span></div></div>
+    </div>
+    <!-- Contrôles granularité -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;color:var(--tx)">Streams — Alterk</div>
+      <div class="ptabs" id="str-gran-tabs">
+        <button class="ptab" onclick="setStrGran(this,'month')">Par mois</button>
+        <button class="ptab active" onclick="setStrGran(this,'quarter')">Par quarter</button>
+        <button class="ptab" onclick="setStrGran(this,'year')">Par an</button>
+      </div>
+      <select id="str-year-select" onchange="setStrYear(this.value)" style="min-width:110px">
+        <option value="2025" selected>2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="all">Toutes années</option>
+      </select>
+      <span class="badge" id="str-source-badge">Alterk · Delta</span>
+    </div>
+    <!-- Chart évolution -->
+    <div class="card" style="margin-bottom:15px">
+      <div class="ch">
+        <div><div class="ct" id="str-chart-title">Streams par quarter · 2024</div><div class="cs">Audio streams · vidéo exclue · source Alterk</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#1DB954;display:inline-block"></span>Spotify</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#EF5466;display:inline-block"></span>Deezer</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#FC3C44;display:inline-block"></span>Apple</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:#999;display:inline-block"></span>Autres</span>
+        </div>
+      </div>
+      <div class="cb"><div style="height:220px"><canvas id="streamTimeline"></canvas></div></div>
+    </div>
+    <!-- Tableau top tracks réels -->
+    <div class="card">
+      <div class="ch"><div><div class="ct" id="str-tbl-title">Top tracks · Alterk</div><div class="cs">↑↓ Trier · filtrer par colonne</div></div></div>
+      <div class="ox" id="streams-tbl"></div>
+    </div>
+  </div>
+
+  <!-- ===== REVENUES ===== -->
+  <div class="panel" id="panel-revenues">
+    <!-- KPIs par type -->
+    <div class="kg k4" id="rev-kpis">
+      <div class="kc" style="--kc:var(--ac)"><div class="kl">Streaming</div><div class="kv" id="rk-str">€261K</div><div class="ks"><span class="ku">↑ +14%</span><span class="km">YTD 2026</span></div></div>
+      <div class="kc" style="--kc:var(--a2)"><div class="kl">Publishing</div><div class="kv" id="rk-pub">€69K</div><div class="ks"><span class="ku">↑ +8%</span><span class="km">YTD 2026</span></div></div>
+      <div class="kc" style="--kc:var(--a5)"><div class="kl">Events</div><div class="kv" id="rk-ev">€19K</div><div class="ks"><span class="km">YTD 2026</span></div></div>
+      <div class="kc" style="--kc:var(--mu)"><div class="kl">Autres (Droits / Merch)</div><div class="kv" id="rk-oth">€35K</div><div class="ks"><span class="km">YTD 2026</span></div></div>
+    </div>
+
+    <!-- Filtres vue : granularité + sélecteur année 2017-2026 -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;color:var(--tx);margin-right:4px">Vue revenus</div>
+      <div class="ptabs" id="rev-gran-tabs">
+        <button class="ptab active" onclick="setRevView(this,'month')">Par mois</button>
+        <button class="ptab" onclick="setRevView(this,'quarter')">Par quarter</button>
+        <button class="ptab" onclick="setRevView(this,'year')">Par an</button>
+      </div>
+      <select id="rev-year-select" onchange="setRevYear(this.value)" style="min-width:110px">
+        <option value="2026" selected>2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+        <option value="2019">2019</option>
+        <option value="2018">2018</option>
+        <option value="2017">2017</option>
+        <option value="all">Toutes années</option>
+      </select>
+      <div style="margin-left:auto">
+        <button class="btn btn-p btn-s" onclick="sp('import')">+ Ajouter un revenu</button>
+      </div>
+    </div>
+
+    <!-- Chart revenus par type -->
+    <div class="card" style="margin-bottom:15px">
+      <div class="ch">
+        <div><div class="ct" id="rev-chart-title">CA mensuel 2026 — par source</div><div class="cs">Streaming · Publishing · Events · Autres</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:var(--ac);display:inline-block"></span>Streaming</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:var(--a2);display:inline-block"></span>Publishing</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:var(--a5);display:inline-block"></span>Events</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)"><span style="width:8px;height:8px;border-radius:2px;background:var(--mu);display:inline-block"></span>Autres</span>
+        </div>
+      </div>
+      <div class="cb"><div style="height:220px"><canvas id="revenueChart"></canvas></div></div>
+    </div>
+
+    <!-- Tableau revenus par type avec sortable -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Détail des revenus</div><div class="cs" id="rev-tbl-sub">Mois · 2026 · ↑↓ Trier · filtrer par colonne</div></div>
+      </div>
+      <div class="ox" id="revenues-tbl"></div>
+    </div>
+  </div>
+
+  <!-- ===== TRACKS ===== -->
+  <div class="panel" id="panel-tracks">
+    <div style="background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.15);border-radius:9px;padding:10px 14px;margin-bottom:13px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:16px">🎯</div>
+      <div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;color:var(--ac)">Objectifs par label · 1 an post-sortie · 4 plateformes</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="pill lb-gts">Get The Sound 500K</span><span class="pill lb-echo">Echo 400K</span>
+          <span class="pill lb-avo">Avorio 100K</span><span class="pill lb-kim">Kimono 300K</span><span class="pill lb-wil">Willow —</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:7px">
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn btn-g btn-s" onclick="setTrackFilter('all',this)">Toutes</button>
+        <button class="btn btn-g btn-s" onclick="setTrackFilter('over',this)" style="color:var(--ok);border-color:rgba(0,212,170,.3)">🚀 Atteint</button>
+        <button class="btn btn-g btn-s" onclick="setTrackFilter('ok',this)" style="color:var(--wa);border-color:rgba(255,170,0,.3)">◎ En route</button>
+        <button class="btn btn-g btn-s" onclick="setTrackFilter('under',this)" style="color:var(--er);border-color:rgba(255,77,109,.3)">⚠ Sous-perf</button>
+        <button class="btn btn-g btn-s" onclick="setTrackFilter('urgent',this)" style="color:var(--a3);border-color:rgba(255,77,109,.4)">🔔 Urgent</button>
+      </div>
+      <button class="btn btn-p btn-s" onclick="om('track-obj-modal')">+ Fixer objectif</button>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Suivi objectifs tracks</div><div class="cs">↑↓ Trier · filtrer par colonne</div></div></div>
+      <div class="ox" id="tracks-tbl"></div>
+    </div>
+  </div>
+
+  <!-- ===== ARTISTS ===== -->
+  <div class="panel" id="panel-artists">
+    <div class="kg k4" id="artist-kpis">
+      <div class="kc" style="--kc:var(--ac)"><div class="kl">CA streaming YTD</div><div class="kv" id="ak-total">€261K</div><div class="ks"><span class="ku">↑ +14%</span></div></div>
+      <div class="kc" style="--kc:var(--a2)"><div class="kl">Artiste #1</div><div class="kv" id="ak-top-val">€45K</div><div class="ks"><span class="km" id="ak-top-name">Artiste A · 17%</span></div></div>
+      <div class="kc" style="--kc:var(--a4)"><div class="kl">€ / 1K streams</div><div class="kv">€3.00</div><div class="ks"><span class="km">Moyenne</span></div></div>
+      <div class="kc" style="--kc:var(--a3)"><div class="kl">Artistes actifs</div><div class="kv">8</div><div class="ks"><span class="km">4 labels</span></div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Bricolage Grotesque';font-size:13px;font-weight:700">Revenus streaming par artiste</div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        <div class="ptabs" id="art-gran-tabs">
+          <button class="ptab" onclick="setArtistGran(this,'month')">Mois</button>
+          <button class="ptab active" onclick="setArtistGran(this,'quarter')">Quarter</button>
+          <button class="ptab" onclick="setArtistGran(this,'year')">Année</button>
+        </div>
+        <select id="artist-year-select" onchange="setArtistYear(this.value)" style="min-width:110px">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="all">Toutes années</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:15px">
+      <div class="card"><div class="ch"><div><div class="ct">CA streaming par artiste</div><div class="cs" id="art-chart-sub">YTD 2026</div></div></div><div class="cb"><div style="height:210px"><canvas id="artistRevChart"></canvas></div></div></div>
+      <div class="card"><div class="ch"><div><div class="ct">Part de CA %</div><div class="cs" id="art-pie-sub">YTD 2026</div></div></div><div class="cb"><div style="height:210px"><canvas id="artistPieChart"></canvas></div></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Top artistes — CA streaming classé</div><div class="cs">↑↓ Trier · filtrer · Publishing/Sync/Events → onglet Revenus</div></div><div id="art-period-badge" class="badge">YTD 2026</div></div>
+      <div class="ox" id="artists-tbl"></div>
+    </div>
+  </div>
+
+  <!-- ===== LABELS ===== -->
+  <div class="panel" id="panel-labels">
+    <div class="kg k4">
+      <div class="kc" style="--kc:var(--ac)"><div class="kl">Get The Sound</div><div class="kv">€161K</div><div class="ks"><span class="ku">↑ +18%</span><span class="km">streaming</span></div></div>
+      <div class="kc" style="--kc:var(--a2)"><div class="kl">Echo</div><div class="kv">€99K</div><div class="ks"><span class="ku">↑ +9%</span><span class="km">streaming</span></div></div>
+      <div class="kc" style="--kc:var(--a4)"><div class="kl">Avorio</div><div class="kv">€47K</div><div class="ks"><span class="ku">↑ +31%</span><span class="km">streaming</span></div></div>
+      <div class="kc" style="--kc:var(--a5)"><div class="kl">Kimono</div><div class="kv">€73K</div><div class="ks"><span class="km">streaming</span></div></div>
+    </div>
+    <div class="g2" style="margin-bottom:15px">
+      <div class="card"><div class="ch"><div><div class="ct">CA Streaming par label</div><div class="cs">Consolidé tous distributeurs</div></div></div><div class="cb"><div style="height:200px"><canvas id="labelRevChart"></canvas></div></div></div>
+      <div class="card"><div class="ch"><div><div class="ct">Répartition streaming</div><div class="cs">% du total</div></div></div><div class="cb"><div style="height:200px"><canvas id="labelPieChart"></canvas></div></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">Labels — revenus streaming consolidés</div><div class="cs">↑↓ Trier · filtrer par colonne</div></div></div>
+      <div class="ox" id="labels-tbl"></div>
+    </div>
+  </div>
+
+  <!-- ===== PLATFORMS ===== -->
+  <div class="panel" id="panel-platforms">
+    <div class="kg k4">
+      <div class="kc" style="--kc:#1DB954"><div class="kl">🟢 Spotify</div><div class="kv">50%</div></div>
+      <div class="kc" style="--kc:#FC3C44"><div class="kl">🍎 Apple Music</div><div class="kv">21%</div></div>
+      <div class="kc" style="--kc:#FF9900"><div class="kl">📦 Amazon</div><div class="kv">17%</div></div>
+      <div class="kc" style="--kc:#EF5466"><div class="kl">🎵 Deezer</div><div class="kv">12%</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ch"><div><div class="ct">Streams par plateforme</div><div class="cs">Empilés mensuels</div></div></div><div class="cb"><div style="height:220px"><canvas id="platformTimeline"></canvas></div></div></div>
+      <div class="card"><div class="ch"><div><div class="ct">Revenus par plateforme</div></div></div><div class="cb"><div style="height:220px"><canvas id="platformRevChart"></canvas></div></div></div>
+    </div>
+  </div>
+
+  <!-- ===== OBJECTIVES ===== -->
+  <div class="panel" id="panel-objectives">
+    <div class="hero">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;gap:12px">
+        <div><div class="hp-lbl">🏆 Objectif CA 2026 — toutes sources</div>
+          <div style="display:flex;align-items:baseline;gap:10px"><div class="hp-val">€384K</div><div class="hp-tgt">/ €1 500 000</div></div></div>
+        <div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:34px;color:var(--a2)">25.6%</div>
+          <div style="font-size:10px;color:var(--wa)">Projection : €1.12M · manque €386K</div></div>
+      </div>
+      <div class="hp-bar"><div class="hp-fill" style="width:25.6%"></div></div>
+      <div class="hp-meta"><span>Jan 2026</span><span>Rythme requis : €192K/mois</span><span>10 mois restants</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><div><div class="ct">Objectifs streams par label</div><div class="cs">1 an post-sortie · 4 plateformes</div></div><button class="btn btn-p btn-s" onclick="om('label-obj-modal')">+ Label</button></div>
+        <div class="cb">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bc)"><div><div style="font-family:'Bricolage Grotesque';font-weight:700;color:var(--ac)">Get The Sound</div><div style="font-size:10px;color:var(--mu)">Toutes nouvelles sorties</div></div><div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--ac)">500K</div><div style="font-size:10px;color:var(--mu)">streams / 1 an</div></div><button class="btn btn-g btn-s" onclick="om('label-obj-modal')">✎</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bc)"><div><div style="font-family:'Bricolage Grotesque';font-weight:700;color:var(--a2)">Echo</div><div style="font-size:10px;color:var(--mu)">Toutes nouvelles sorties</div></div><div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--a2)">400K</div><div style="font-size:10px;color:var(--mu)">streams / 1 an</div></div><button class="btn btn-g btn-s" onclick="om('label-obj-modal')">✎</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bc)"><div><div style="font-family:'Bricolage Grotesque';font-weight:700;color:var(--a4)">Avorio</div><div style="font-size:10px;color:var(--mu)">Toutes nouvelles sorties</div></div><div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--a4)">100K</div><div style="font-size:10px;color:var(--mu)">streams / 1 an</div></div><button class="btn btn-g btn-s" onclick="om('label-obj-modal')">✎</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bc)"><div><div style="font-family:'Bricolage Grotesque';font-weight:700;color:var(--a5)">Kimono</div><div style="font-size:10px;color:var(--mu)">Toutes nouvelles sorties</div></div><div style="text-align:right"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--a5)">300K</div><div style="font-size:10px;color:var(--mu)">streams / 1 an</div></div><button class="btn btn-g btn-s" onclick="om('label-obj-modal')">✎</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0"><div><div style="font-family:'Bricolage Grotesque';font-weight:700;color:var(--mu)">Willow</div><div style="font-size:10px;color:var(--mu)">Label à l'arrêt</div></div><div style="font-family:'Bebas Neue';font-size:22px;color:var(--mu)">—</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">Répartition cible CA 2026</div></div><button class="btn btn-g btn-s" onclick="om('revenue-modal')">✎ Éditer</button></div>
+        <div class="cb">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px">
+            <div style="text-align:center;padding:14px;background:var(--sf2);border-radius:9px;border:1px solid var(--bc)"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px">Mensuel cible</div><div style="font-family:'Bebas Neue';font-size:36px;color:var(--a4)">€125K</div></div>
+            <div style="text-align:center;padding:14px;background:var(--sf2);border-radius:9px;border:1px solid var(--bc)"><div style="font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px">Annuel 2026</div><div style="font-family:'Bebas Neue';font-size:36px;color:var(--a2)">€1.5M</div></div>
+          </div>
+          <div class="ms"><div class="msd" style="background:var(--ac)"></div><div><div class="msl">Streaming (68%)</div><div class="msv" style="color:var(--ac)">€1 020 000 cible</div></div></div>
+          <div class="ms"><div class="msd" style="background:var(--a2)"></div><div><div class="msl">Publishing (18%)</div><div class="msv" style="color:var(--a2)">€270 000 cible</div></div></div>
+          <div class="ms"><div class="msd" style="background:var(--a3)"></div><div><div class="msl">Sync / Licences (9%)</div><div class="msv" style="color:var(--a3)">€135 000 cible</div></div></div>
+          <div class="ms"><div class="msd" style="background:var(--a4)"></div><div><div class="msl">Events (5%)</div><div class="msv" style="color:var(--a4)">€75 000 cible</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="g3">
+      <div class="sb2" style="background:rgba(0,212,170,.07);border-color:rgba(0,212,170,.2)"><div class="sv" style="color:var(--ok)">8</div><div class="sl">Objectifs tracks atteints ✓</div></div>
+      <div class="sb2" style="background:rgba(255,170,0,.07);border-color:rgba(255,170,0,.2)"><div class="sv" style="color:var(--wa)">14</div><div class="sl">En progression (30–99%)</div></div>
+      <div class="sb2" style="background:rgba(255,77,109,.07);border-color:rgba(255,77,109,.2)"><div class="sv" style="color:var(--er)">42</div><div class="sl">Sous-perf · à relancer</div></div>
+    </div>
+  </div>
+
+  <!-- ===== IMPORT ===== -->
+  <div class="panel" id="panel-import">
+    <!-- Wizard sélecteur de type -->
+    <div style="font-family:'Bricolage Grotesque';font-size:15px;font-weight:800;margin-bottom:14px">Ajouter des revenus</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">
+      <div class="imp-type-card active" id="itype-streaming" onclick="selectImportType('streaming')">
+        <div class="itc-icon">🎵</div>
+        <div class="itc-name">Streaming</div>
+        <div class="itc-sub">Import fichier distributeur</div>
+      </div>
+      <div class="imp-type-card" id="itype-publishing" onclick="selectImportType('publishing')">
+        <div class="itc-icon">©</div>
+        <div class="itc-name">Publishing</div>
+        <div class="itc-sub">Alterk · Sony Music Publishing</div>
+      </div>
+      <div class="imp-type-card" id="itype-events" onclick="selectImportType('events')">
+        <div class="itc-icon">🎤</div>
+        <div class="itc-name">Events</div>
+        <div class="itc-sub">Facture ou montant direct</div>
+      </div>
+      <div class="imp-type-card" id="itype-other" onclick="selectImportType('other')">
+        <div class="itc-icon">＋</div>
+        <div class="itc-name">Autre</div>
+        <div class="itc-sub">Droits voisins · SoundExchange · Merch</div>
+      </div>
+    </div>
+
+    <!-- STREAMING FORM -->
+    <div id="imp-streaming" class="imp-section">
+      <div class="imp-section-title">Import Streaming — Fichier distributeur</div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">Sélectionner le distributeur</div><div class="cs">Le fichier sera parsé automatiquement selon le format</div></div></div>
+          <div class="cb">
+            <div class="dist-cards">
+              <div class="dist-pick active" id="dp-believe" onclick="selectDist('believe')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Believe</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:2px">CSV mensuel · ISRC · artiste · DSP · streams · revenus</div>
+                <span class="pill ps" style="margin-top:6px;display:inline-flex">✓ Actif</span>
+              </div>
+              <div class="dist-pick" id="dp-tunecore" onclick="selectDist('tunecore')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Tunecore</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:2px">CSV trimestriel · UPC · titre · territoire · quantité · nets</div>
+                <span class="pill ps" style="margin-top:6px;display:inline-flex">✓ Actif</span>
+              </div>
+              <div class="dist-pick" id="dp-alterk" onclick="selectDist('alterk')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Alterk</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:2px">XLSX mensuel · titre · label · DSP · streams · royalties</div>
+                <span class="pill pw" style="margin-top:6px;display:inline-flex">⚠ Mapping</span>
+              </div>
+              <div class="dist-pick" id="dp-universal" onclick="selectDist('universal')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Universal</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:2px">CSV mensuel · format UMG · ISRC · territoire · DSP</div>
+                <span class="pill ps" style="margin-top:6px;display:inline-flex">✓ Actif</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">Déposer le fichier</div><div class="cs" id="str-dist-info">Distributeur sélectionné : Believe · CSV mensuel</div></div></div>
+          <div class="cb">
+            <div class="uz" onclick="fakeUpload(selDist)" style="margin-bottom:14px">
+              <div class="uz-i">📂</div>
+              <div class="uz-t">Glisse le fichier ici ou clique</div>
+              <div class="uz-s" id="str-file-hint">CSV · XLSX · format Believe accepté</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
+              <div class="fr" style="margin:0"><label class="fl">Période</label>
+                <select style="width:100%"><option>Jan 2026</option><option>Fév 2026</option><option>Mar 2026</option><option>Q1 2026</option><option>Q2 2026</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Type de données</label>
+                <select style="width:100%"><option>Streams + Revenus</option><option>Streams uniquement</option><option>Revenus uniquement</option></select>
+              </div>
+            </div>
+            <div style="background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.15);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--mu);margin-bottom:12px">
+              ⚙️ Les données seront automatiquement classées par track, label, artiste et plateforme selon le contenu du fichier.
+            </div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="fakeUpload(selDist)">Valider l'import</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUBLISHING FORM -->
+    <div id="imp-publishing" class="imp-section" style="display:none">
+      <div class="imp-section-title">Import Publishing</div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">Source Publishing</div></div></div>
+          <div class="cb">
+            <div class="dist-cards">
+              <div class="dist-pick active" id="pp-alterk" onclick="selectPubSource('alterk-pub')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:14px">Alterk</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:3px">Rapport Publishing Alterk · CSV ou XLSX</div>
+                <div style="font-size:10px;color:var(--mu)">Droits d'auteur · droits mécaniques · diffusion</div>
+              </div>
+              <div class="dist-pick" id="pp-sony" onclick="selectPubSource('sony-mp')">
+                <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:14px">Sony Music Publishing</div>
+                <div style="font-size:10px;color:var(--mu);margin-top:3px">Rapport SMP · format propriétaire</div>
+                <div style="font-size:10px;color:var(--mu)">ISRC · territoire · type de droit · montant</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">Déposer le relevé Publishing</div><div class="cs" id="pub-source-info">Source : Alterk Publishing</div></div></div>
+          <div class="cb">
+            <div class="uz" onclick="fakeUpload('Publishing')" style="margin-bottom:14px">
+              <div class="uz-i">©</div>
+              <div class="uz-t">Dépose le relevé ici</div>
+              <div class="uz-s" id="pub-file-hint">CSV / XLSX · format Alterk Publishing</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
+              <div class="fr" style="margin:0"><label class="fl">Période</label>
+                <select style="width:100%"><option>Q1 2026</option><option>Q4 2025</option><option>Q3 2025</option><option>Q2 2025</option><option>2025 complet</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Répartition</label>
+                <select style="width:100%"><option>Auto (selon le fichier)</option><option>Par artiste</option><option>Par label</option><option>Global</option></select>
+              </div>
+            </div>
+            <div style="background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.15);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--mu);margin-bottom:12px">
+              ⚙️ Les revenus seront affectés aux artistes et labels selon les ISRC du fichier, et apparaîtront dans l'onglet Revenus → Publishing.
+            </div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="fakeUpload('Publishing')">Importer le relevé</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTS FORM -->
+    <div id="imp-events" class="imp-section" style="display:none">
+      <div class="imp-section-title">Saisir un revenu Events</div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">Saisie directe du montant</div><div class="cs">Sans fichier · montant et détails</div></div></div>
+          <div class="cb">
+            <div class="fr"><label class="fl">Montant (€)</label><input type="number" placeholder="ex: 3500" id="ev-amount"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+              <div class="fr" style="margin:0"><label class="fl">Artiste</label>
+                <select style="width:100%"><option>— Tous / Label</option><option>Artiste A</option><option>Artiste B</option><option>Artiste C</option><option>Artiste D</option><option>Artiste E</option><option>Artiste F</option><option>Artiste G</option><option>Artiste H</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Label</label>
+                <select style="width:100%"><option>Get The Sound</option><option>Echo</option><option>Avorio</option><option>Kimono</option><option>Willow</option></select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+              <div class="fr" style="margin:0"><label class="fl">Date de l'event</label><input type="date"></div>
+              <div class="fr" style="margin:0"><label class="fl">Période comptable</label>
+                <select style="width:100%"><option>Jan 2026</option><option>Fév 2026</option><option>Q1 2026</option><option>2025</option></select>
+              </div>
+            </div>
+            <div class="fr"><label class="fl">Nom de l'event / description</label><input type="text" placeholder="ex: Festival X · showcase · tournée"></div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="fakeUpload('Events direct');toast('✓ Revenu Events enregistré')">Enregistrer</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">Ou importer une facture</div><div class="cs">PDF · XLSX · CSV</div></div></div>
+          <div class="cb">
+            <div class="uz" onclick="fakeUpload('Events facture')" style="margin-bottom:14px">
+              <div class="uz-i">🧾</div>
+              <div class="uz-t">Dépose la facture ici</div>
+              <div class="uz-s">PDF · XLSX · CSV · le montant sera extrait</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+              <div class="fr" style="margin:0"><label class="fl">Artiste</label>
+                <select style="width:100%"><option>— Tous / Label</option><option>Artiste A</option><option>Artiste B</option><option>Artiste C</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Période</label>
+                <select style="width:100%"><option>Jan 2026</option><option>Fév 2026</option><option>Q1 2026</option></select>
+              </div>
+            </div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="fakeUpload('Events facture')">Importer la facture</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OTHER FORM -->
+    <div id="imp-other" class="imp-section" style="display:none">
+      <div class="imp-section-title">Autres revenus</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+        <div class="dist-pick active" id="oth-teg" onclick="selectOtherType('teg')">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Droits voisins</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:3px">TEG / ADAMI / SPEDIDAM</div>
+          <div style="font-size:10px;color:var(--mu)">Rémunération équitable · copie privée</div>
+        </div>
+        <div class="dist-pick" id="oth-sx" onclick="selectOtherType('soundexchange')">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">SoundExchange</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:3px">Droits numériques US</div>
+          <div style="font-size:10px;color:var(--mu)">Pandora · SiriusXM · webcasting</div>
+        </div>
+        <div class="dist-pick" id="oth-merch" onclick="selectOtherType('merch')">
+          <div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:13px">Marchandises</div>
+          <div style="font-size:10px;color:var(--mu);margin-top:3px">Ventes physiques / en ligne</div>
+          <div style="font-size:10px;color:var(--mu)">T-shirts · vinyles · goodies</div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">Saisir le montant</div><div class="cs" id="other-type-label">Type : Droits voisins (TEG)</div></div></div>
+          <div class="cb">
+            <div class="fr"><label class="fl">Montant (€)</label><input type="number" placeholder="ex: 1200"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+              <div class="fr" style="margin:0"><label class="fl">Artiste</label>
+                <select style="width:100%"><option>— Tous / Label</option><option>Artiste A</option><option>Artiste B</option><option>Artiste C</option><option>Artiste D</option><option>Artiste E</option><option>Artiste F</option><option>Artiste G</option><option>Artiste H</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Période</label>
+                <select style="width:100%"><option>Jan 2026</option><option>Fév 2026</option><option>Q1 2026</option><option>2025</option><option>2024</option></select>
+              </div>
+            </div>
+            <div class="fr"><label class="fl">Description</label><input type="text" id="other-desc" placeholder="ex: Relevé TEG Q4 2025"></div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="toast('✓ Revenu enregistré dans Autres')">Enregistrer</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">Ou importer un relevé / facture</div><div class="cs">PDF · CSV · XLSX</div></div></div>
+          <div class="cb">
+            <div class="uz" onclick="fakeUpload('Autre')" style="margin-bottom:14px">
+              <div class="uz-i">📄</div>
+              <div class="uz-t">Dépose le fichier / relevé ici</div>
+              <div class="uz-s" id="other-file-hint">PDF · CSV · XLSX · format TEG / SoundExchange / Merch</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+              <div class="fr" style="margin:0"><label class="fl">Source</label>
+                <select style="width:100%" id="other-src-sel"><option>Droits voisins (TEG)</option><option>SoundExchange</option><option>Marchandises</option></select>
+              </div>
+              <div class="fr" style="margin:0"><label class="fl">Période</label>
+                <select style="width:100%"><option>Jan 2026</option><option>Fév 2026</option><option>Q1 2026</option><option>2025</option></select>
+              </div>
+            </div>
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="fakeUpload('Autre')">Importer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end .content -->
+</main>
+
+<!-- MODALS -->
+<div class="mo" id="track-obj-modal" onclick="if(event.target===this)cm('track-obj-modal')">
+  <div class="md"><div class="mdt">Fixer un objectif track</div><div class="mds">Streams 1 an · Spotify + Apple Music + Amazon Music + Deezer</div>
+    <div class="fr"><label class="fl">Nom de la track</label><input type="text" placeholder="ex: Nuit Blanche"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+      <div class="fr" style="margin:0"><label class="fl">Artiste</label><input type="text"></div>
+      <div class="fr" style="margin:0"><label class="fl">Label</label><select style="width:100%"><option>Get The Sound (500K)</option><option>Echo (400K)</option><option>Avorio (100K)</option><option>Kimono (300K)</option><option>Willow (—)</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+      <div class="fr" style="margin:0"><label class="fl">Distributeur</label><select style="width:100%"><option>Believe</option><option>Tunecore</option><option>Alterk</option><option>Universal</option></select></div>
+      <div class="fr" style="margin:0"><label class="fl">Date de sortie</label><input type="date"></div>
+    </div>
+    <div class="fr"><label class="fl">Objectif streams 1 an</label><input type="number" value="500000"><div class="fh">Pré-rempli selon le label · modifiable</div></div>
+    <div class="ma"><button class="btn btn-g" onclick="cm('track-obj-modal')">Annuler</button><button class="btn btn-p" onclick="cm('track-obj-modal');toast('✓ Objectif enregistré')">Enregistrer</button></div>
+  </div>
+</div>
+<div class="mo" id="label-obj-modal" onclick="if(event.target===this)cm('label-obj-modal')">
+  <div class="md"><div class="mdt">Objectif label</div><div class="mds">Seuil de streams par défaut pour toutes nouvelles sorties</div>
+    <div class="fr"><label class="fl">Nom du label</label><input type="text"></div>
+    <div class="fr"><label class="fl">Objectif streams 1 an</label><input type="number" value="500000"></div>
+    <div class="ma"><button class="btn btn-g" onclick="cm('label-obj-modal')">Annuler</button><button class="btn btn-p" onclick="cm('label-obj-modal');toast('✓ Label enregistré')">Enregistrer</button></div>
+  </div>
+</div>
+<div class="mo" id="revenue-modal" onclick="if(event.target===this)cm('revenue-modal')">
+  <div class="md"><div class="mdt">Objectifs Revenus 2026</div><div class="mds">Objectif global : 1 500 000 € toutes sources</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">
+      <div class="fr" style="margin:0"><label class="fl">Mensuel cible (€)</label><input type="number" value="125000"></div>
+      <div class="fr" style="margin:0"><label class="fl">Annuel 2026 (€)</label><input type="number" value="1500000"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div class="fr" style="margin:0"><label class="fl">Streaming %</label><input type="number" value="68"></div>
+      <div class="fr" style="margin:0"><label class="fl">Publishing %</label><input type="number" value="18"></div>
+      <div class="fr" style="margin:0"><label class="fl">Sync %</label><input type="number" value="9"></div>
+      <div class="fr" style="margin:0"><label class="fl">Events %</label><input type="number" value="5"></div>
+    </div>
+    <div class="ma" style="margin-top:12px"><button class="btn btn-g" onclick="cm('revenue-modal')">Annuler</button><button class="btn btn-p" onclick="cm('revenue-modal');toast('✓ Objectifs mis à jour')">Enregistrer</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const LM={
+  'Get The Sound':{goal:500000,cls:'lb-gts',color:'#e8ff47'},
+  'Echo':         {goal:400000,cls:'lb-echo',color:'#7c5cfc'},
+  'Avorio':       {goal:100000,cls:'lb-avo', color:'#00d4aa'},
+  'Kimono':       {goal:300000,cls:'lb-kim', color:'#ff9f43'},
+  'Willow':       {goal:null,  cls:'lb-wil', color:'#6a6a86'},
+};
+
+const TRACKS=[
+  {name:"Nuit Blanche",   artist:"Artiste A",label:"Get The Sound",dist:"Believe", release:"2025-02-10",streams:524000,spotify:262000,apple:110200,amazon:94320,deezer:57480},
+  {name:"Momentum",       artist:"Artiste C",label:"Echo",         dist:"Tunecore",release:"2025-03-01",streams:383000,spotify:191500,apple:80430, amazon:68940,deezer:42130},
+  {name:"Ligne Horizon",  artist:"Artiste B",label:"Get The Sound",dist:"Believe", release:"2025-03-15",streams:402000,spotify:201000,apple:84420, amazon:72360,deezer:44220},
+  {name:"Kimono No.1",    artist:"Artiste D",label:"Kimono",       dist:"Universal",release:"2025-04-01",streams:284000,spotify:142000,apple:59640, amazon:51120,deezer:31240},
+  {name:"Miroir Brisé",  artist:"Artiste A",label:"Get The Sound",dist:"Believe", release:"2025-05-20",streams:310000,spotify:155000,apple:65100, amazon:55800,deezer:34100},
+  {name:"Avorio Dreams",  artist:"Artiste E",label:"Avorio",       dist:"Alterk",  release:"2025-06-01",streams:91000, spotify:45500, apple:19110, amazon:16380,deezer:10010},
+  {name:"Vague Ame",      artist:"Artiste A",label:"Get The Sound",dist:"Believe", release:"2025-06-10",streams:218000,spotify:109000,apple:45780, amazon:39240,deezer:23980},
+  {name:"Flash",          artist:"Artiste F",label:"Kimono",       dist:"Alterk",  release:"2025-07-01",streams:198000,spotify:99000, apple:41580, amazon:35640,deezer:21780},
+  {name:"Profondeurs",    artist:"Artiste C",label:"Echo",         dist:"Tunecore",release:"2025-07-22",streams:142000,spotify:71000, apple:29820, amazon:25560,deezer:15620},
+  {name:"Soleil Plomb",   artist:"Artiste B",label:"Get The Sound",dist:"Universal",release:"2025-06-30",streams:48000,spotify:24000, apple:10080, amazon:8640, deezer:5280},
+  {name:"Avorio Light",   artist:"Artiste G",label:"Avorio",       dist:"Alterk",  release:"2025-08-15",streams:67000, spotify:33500, apple:14070, amazon:12060,deezer:7370},
+  {name:"Ombres",         artist:"Artiste D",label:"Kimono",       dist:"Universal",release:"2025-09-05",streams:109000,spotify:54500,apple:22890, amazon:19620,deezer:11990},
+  {name:"Decollage",      artist:"Artiste E",label:"Avorio",       dist:"Tunecore",release:"2025-10-20",streams:44000, spotify:22000, apple:9240,  amazon:7920, deezer:4840},
+  {name:"Sakura",         artist:"Artiste F",label:"Kimono",       dist:"Alterk",  release:"2025-11-01",streams:231000,spotify:115500,apple:48510, amazon:41580,deezer:25410},
+  {name:"Willow Song",    artist:"Artiste H",label:"Willow",       dist:"Believe", release:"2024-06-01",streams:88000, spotify:44000, apple:18480, amazon:15840,deezer:9680},
+];
+
+// ── DRIVE DATA SOURCES ───────────────────────────────────────────────────────
+const DRIVE_URLS = {
+  alterk:    'https://drive.google.com/uc?export=download&id=14cTqT-1UOZWM6atfowq6KLToAz6syqLX',
+  believe:   'https://drive.google.com/uc?export=download&id=1GKejlLswrCgYn0fGstn-b0-SvJOhRFWN',
+  tunecore:  'https://drive.google.com/uc?export=download&id=15kpl_Evr2ifN0XKnz6Rmbl0U1nSiVwQp',
+  universal: 'https://drive.google.com/uc?export=download&id=14serlgkwQXg-41x0Cqv7sOlJu9eivvLz',
+};
+
+// ── DATA PLACEHOLDERS (remplis au chargement depuis Drive) ────────────────────
+let ALTERK_DATA   = {months:{},quarters:{},years:{}};
+let ARTISTS       = [];
+let LABELS_DATA   = [];
+let REV_ENTRIES   = [];
+let DATA_LOADED   = false;
+
+// ── LABEL MAP ─────────────────────────────────────────────────────────────────
+
+// ── CHARGEMENT DEPUIS GOOGLE DRIVE ───────────────────────────────────────────
+
+
+async function loadAllData() {
+  const loader = document.getElementById('loader');
+  const app    = document.getElementById('app');
+  if (loader) loader.style.display = 'flex';
+  if (app)    app.style.display    = 'none';
+
+  let raw;
+  try {
+    document.getElementById('loader-msg').textContent = 'Chargement données...';
+    const r = await fetch(DATA_URL);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    raw = await r.json();
+  } catch(e) {
+    document.getElementById('loader-msg').textContent = 'Erreur : ' + e.message;
+    console.error('[CTRL] Erreur chargement:', e);
+    return;
+  }
+
+  // raw.m = months, raw.q = quarters, raw.y = years
+  // short keys: r=royalty, s=streams, v=video, bd=by_distrib, dp=dsps, ar=artists, lb=labels, tr=tracks
+
+  function expand(src) {
+    const out = {};
+    for (const [k, d] of Object.entries(src)) {
+      out[k] = {
+        royalty: d.r, streams: d.s, video: d.v,
+        by_distrib: d.bd||{}, dsps: d.dp||{},
+        artists: d.ar||{}, labels: d.lb||{},
+        tracks: (d.tr||[]).map(t => ({title:t.t, artist:t.a, label:t.l, royalty:t.r, streams:t.s}))
+      };
+    }
+    return out;
+  }
+
+  ALTERK_DATA = {
+    months:   expand(raw.m || {}),
+    quarters: expand(raw.q || {}),
+    years:    expand(raw.y || {}),
+  };
+
+  const allMonths = ALTERK_DATA.months;
+
+  // ── BUILD ARTISTS ────────────────────────────────────────────────────────
+  const artMap = {}, artLabel = {};
+  for (const [ym, d] of Object.entries(allMonths)) {
+    const y = ym.slice(0,4);
+    for (const [art, roy] of Object.entries(d.artists||{})) {
+      if (!art || art.length < 2) continue;
+      if (!artMap[art]) artMap[art] = {};
+      artMap[art][y] = (artMap[art][y]||0) + roy;
+    }
+    for (const t of (d.tracks||[])) {
+      if (t.artist && t.label && !artLabel[t.artist]) artLabel[t.artist] = t.label;
+    }
+  }
+  ARTISTS = Object.entries(artMap).map(([name, yrs]) => {
+    const total = Object.values(yrs).reduce((s,v)=>s+v, 0);
+    return { name, label: artLabel[name]||'Get The Sound', total,
+      ytd:   yrs['2025']||0,
+      y2017: yrs['2017']||0, y2018: yrs['2018']||0, y2019: yrs['2019']||0,
+      y2020: yrs['2020']||0, y2021: yrs['2021']||0, y2022: yrs['2022']||0,
+      y2023: yrs['2023']||0, y2024: yrs['2024']||0, y2025: yrs['2025']||0,
+    };
+  }).filter(a => a.total > 1).sort((a,b) => b.total - a.total).slice(0,50);
+
+  // ── BUILD LABELS_DATA ────────────────────────────────────────────────────
+  const lblMap = {}, lblYr = {};
+  for (const [ym, d] of Object.entries(allMonths)) {
+    const y = ym.slice(0,4);
+    for (const [lbl, roy] of Object.entries(d.labels||{})) {
+      if (!lbl) continue;
+      lblMap[lbl] = (lblMap[lbl]||0) + roy;
+      if (!lblYr[lbl]) lblYr[lbl] = {};
+      lblYr[lbl][y] = (lblYr[lbl][y]||0) + roy;
+    }
+  }
+  LABELS_DATA = Object.entries(lblMap).map(([name, streaming]) => {
+    const info = LM[name] || {cls:'lb-wil', color:'#6a6a86'};
+    return { name, cls:info.cls, color:info.color, streaming, years: lblYr[name]||{} };
+  }).sort((a,b) => b.streaming - a.streaming);
+
+  // ── BUILD REV_ENTRIES ────────────────────────────────────────────────────
+  REV_ENTRIES = [];
+  const mnames = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  for (const [ym, d] of Object.entries(allMonths)) {
+    const y = +ym.slice(0,4), mo = +ym.slice(5,7);
+    const q = 'Q'+(Math.floor((mo-1)/3)+1);
+    const mname = mnames[mo-1]+' '+y;
+    for (const [distrib, roy] of Object.entries(d.by_distrib||{})) {
+      if (roy > 0.01) REV_ENTRIES.push({
+        date:ym, year:y, q, month:mname,
+        type:'streaming', source:distrib,
+        label:'Get The Sound', artiste:'—',
+        amount: Math.round(roy*100)/100
+      });
+    }
+  }
+
+  DATA_LOADED = true;
+  if (loader) loader.style.display = 'none';
+  if (app)    app.style.display    = 'flex';
+
+  renderAlerts();
+  buildTracksTable();
+  setTimeout(initCharts, 80);
+}
+
+let revView='month', revYear=2026;
+
+function getRevData(){
+  let data=REV_ENTRIES;
+  if(revYear!=='all') data=data.filter(r=>r.year===revYear);
+  return data;
+}
+
+function groupRevData(){
+  const data=getRevData();
+  const groups={};
+  data.forEach(r=>{
+    const key=revView==='month'?r.month:revView==='quarter'?(r.year+' '+r.q):String(r.year);
+    if(!groups[key])groups[key]={period:key,streaming:0,publishing:0,events:0,autres:0,total:0};
+    groups[key][r.type]=(groups[key][r.type]||0)+r.amount;
+    groups[key].total+=r.amount;
+  });
+  return Object.values(groups).sort((a,b)=>a.period.localeCompare(b.period));
+}
+
+function setRevView(btn, view){
+  revView=view;
+  document.querySelectorAll('#rev-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshRevPanel();
+}
+
+function setRevYear(yr){
+  revYear=yr==='all'?'all':+yr||yr;
+  refreshRevPanel();
+}
+
+function refreshRevPanel(){
+  const grouped=groupRevData();
+  const title=document.getElementById('rev-chart-title');
+  const sub=document.getElementById('rev-tbl-sub');
+  const lbl=revView==='month'?'mensuel':revView==='quarter'?'par quarter':'annuel';
+  const yr=revYear==='all'?'Toutes années':revYear;
+  if(title)title.textContent=`CA ${lbl} ${yr} — par source`;
+  if(sub)sub.textContent=`${lbl.charAt(0).toUpperCase()+lbl.slice(1)} · ${yr} · ↑↓ Trier · filtrer`;
+
+  // Update KPIs
+  const data=getRevData();
+  const sum=(type)=>data.filter(r=>r.type===type).reduce((s,r)=>s+r.amount,0);
+  const ks=document.getElementById('rk-str');if(ks)ks.textContent='€'+fmtK(sum('streaming'));
+  const kp=document.getElementById('rk-pub');if(kp)kp.textContent='€'+fmtK(sum('publishing'));
+  const ke=document.getElementById('rk-ev');if(ke)ke.textContent='€'+fmtK(sum('events'));
+  const ko=document.getElementById('rk-oth');if(ko)ko.textContent='€'+fmtK(sum('autres'));
+
+  // Update chart
+  if(CHARTS.rc){
+    CHARTS.rc.data.labels=grouped.map(g=>g.period);
+    CHARTS.rc.data.datasets[0].data=grouped.map(g=>g.streaming);
+    CHARTS.rc.data.datasets[1].data=grouped.map(g=>g.publishing);
+    CHARTS.rc.data.datasets[2].data=grouped.map(g=>g.events);
+    CHARTS.rc.data.datasets[3].data=grouped.map(g=>g.autres);
+    CHARTS.rc.update();
+  }
+
+  buildRevenuesTable();
+}
+
+// ── REVENUES TABLE ─────────────────────────────────────────────────────────────
+function buildRevenuesTable(){
+  const data=getRevData();
+  const grouped=groupRevData();
+
+  const typeColors={streaming:'var(--ac)',publishing:'var(--a2)',events:'var(--a5)',autres:'var(--mu)'};
+  const typeLabels={streaming:'Streaming',publishing:'Publishing',events:'Events',autres:'Autres'};
+
+  const headers=[
+    {label:'Période'},{label:'Type'},{label:'Source / Distributeur'},
+    {label:'Label'},{label:'Artiste'},{label:'Description',sortable:false},
+    {label:'Montant'},{label:'% du total',sortable:false}
+  ];
+  const totalAll=data.reduce((s,r)=>s+r.amount,0);
+
+  makeSortable('revenues-tbl',headers,
+    ()=>data.map(r=>({
+      _sort:[r.month,r.type,r.source,r.label,r.artiste,'',r.amount,0],
+      _filter:{0:r.month,1:r.type,2:r.source,3:r.label,4:r.artiste},
+      _raw:r
+    })),
+    row=>{
+      const r=row._raw;
+      const col=typeColors[r.type]||'var(--mu)';
+      const pct=totalAll?Math.round(r.amount/totalAll*100):0;
+      const lm=LM[r.label];
+      return`<tr>
+        <td style="color:var(--mu)">${r.month}</td>
+        <td><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;background:${col}18;color:${col};border:1px solid ${col}44">${typeLabels[r.type]||r.type}</span></td>
+        <td><span class="pill pn" style="font-size:10px">${r.source}</span></td>
+        <td>${lm?`<span class="pill ${lm.cls}" style="font-size:9px">${r.label}</span>`:r.label}</td>
+        <td style="color:var(--mu)">${r.artiste}</td>
+        <td style="color:var(--mu);font-size:11px">${r.desc||'—'}</td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:${col}">€${fmtK(r.amount)}</strong></td>
+        <td><span style="font-size:11px;color:var(--mu)">${pct}%</span></td>
+      </tr>`;
+    },{defaultCol:6,defaultDir:-1}
+  ).render();
+}
+
+// ── IMPORT WIZARD JS ──────────────────────────────────────────────────────────
+let selDist='believe', selPubSrc='alterk-pub', selOtherType='teg';
+
+function selectImportType(type){
+  ['streaming','publishing','events','other'].forEach(t=>{
+    document.getElementById('itype-'+t)?.classList.remove('active');
+    const sec=document.getElementById('imp-'+t);if(sec)sec.style.display='none';
+  });
+  document.getElementById('itype-'+type)?.classList.add('active');
+  const sec=document.getElementById('imp-'+type);if(sec)sec.style.display='block';
+}
+
+function selectDist(d){
+  selDist=d;
+  ['believe','tunecore','alterk','universal'].forEach(x=>document.getElementById('dp-'+x)?.classList.remove('active'));
+  document.getElementById('dp-'+d)?.classList.add('active');
+  const info={believe:'Believe · CSV mensuel · ISRC artiste DSP streams revenus',tunecore:'Tunecore · CSV trimestriel · UPC territoire quantité nets',alterk:'Alterk · XLSX mensuel · label DSP streams royalties',universal:'Universal · CSV mensuel · format UMG ISRC territoire DSP'};
+  const hint={believe:'CSV · format Believe accepté',tunecore:'CSV · format Tunecore accepté',alterk:'XLSX · mapping requis',universal:'CSV · format UMG accepté'};
+  const el1=document.getElementById('str-dist-info');if(el1)el1.textContent=info[d]||d;
+  const el2=document.getElementById('str-file-hint');if(el2)el2.textContent=hint[d]||d;
+}
+
+function selectPubSource(s){
+  selPubSrc=s;
+  ['alterk-pub','sony-mp'].forEach(x=>document.getElementById('pp-'+x.replace('-pub','').replace('-mp',''))?.classList.remove('active'));
+  if(s==='alterk-pub'){document.getElementById('pp-alterk')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Alterk Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='CSV / XLSX · format Alterk Publishing';}
+  else{document.getElementById('pp-sony')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Sony Music Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='Format SMP · propriétaire SonyATV';}
+}
+
+function selectOtherType(t){
+  selOtherType=t;
+  ['teg','sx','merch'].forEach(x=>document.getElementById('oth-'+x)?.classList.remove('active'));
+  const map={teg:'oth-teg',soundexchange:'oth-sx',merch:'oth-merch'};
+  document.getElementById(map[t]||'oth-teg')?.classList.add('active');
+  const labels={teg:'Type : Droits voisins (TEG / ADAMI / SPEDIDAM)',soundexchange:'Type : SoundExchange — droits numériques US',merch:'Type : Ventes marchandises / produits dérivés'};
+  const hints={teg:'PDF · CSV · format TEG ADAMI SPEDIDAM',soundexchange:'CSV · format SoundExchange',merch:'CSV · XLSX · rapport de ventes'};
+  const el=document.getElementById('other-type-label');if(el)el.textContent=labels[t]||t;
+  const h=document.getElementById('other-file-hint');if(h)h.textContent=hints[t]||t;
+}
+
+// ── ARTISTS TABLE ─────────────────────────────────────────────────────────────
+// Years available in ARTISTS data (most recent first for column display)
+const ART_YEARS = ['ytd','y2025','y2024','y2023','y2022','y2021','y2020','y2019','y2018','y2017'];
+const ART_YEAR_LABELS = {ytd:'YTD 2026',y2025:'2025',y2024:'2024',y2023:'2023',y2022:'2022',y2021:'2021',y2020:'2020',y2019:'2019',y2018:'2018',y2017:'2017'};
+
+let curArtistGran = 'quarter'; // month | quarter | year
+let curArtistYear = '2026';    // 2017-2026 | all
+
+// Map year select value → ARTISTS key
+function yearToKey(yr){
+  if(yr==='2026'||yr==='all') return 'ytd';
+  return 'y'+yr;
+}
+
+// Which columns to show in the mini-bar sparkline section (last 5 visible years)
+function getArtistCols(){
+  return ART_YEARS.slice(0,5); // ytd, 2025, 2024, 2023, 2022
+}
+
+function artPeriodLabel(){
+  const gran={'month':'Mois','quarter':'Quarter','year':'Année'}[curArtistGran]||curArtistGran;
+  const yr=curArtistYear==='all'?'Toutes années':curArtistYear;
+  return gran+' · '+yr;
+}
+
+function buildArtistsTable(){
+  const key = yearToKey(curArtistYear);
+  const cols = getArtistCols();
+  const sorted=[...ARTISTS].sort((a,b)=>(b[key]||0)-(a[key]||0));
+  const total=sorted.reduce((s,a)=>s+(a[key]||0),0);
+  const maxAll=Math.max(...ARTISTS.flatMap(x=>cols.map(c=>x[c]||0)));
+
+  // Update KPIs
+  const top=sorted[0];
+  const topPct=total?Math.round((top[key]||0)/total*100):0;
+  const kv=document.getElementById('ak-total');if(kv)kv.textContent='€'+fmtK(total);
+  const tv=document.getElementById('ak-top-val');if(tv)tv.textContent='€'+fmtK(top[key]||0);
+  const tn=document.getElementById('ak-top-name');if(tn)tn.textContent=top.name+' · '+topPct+'%';
+
+  // Update badge & subtitles
+  const lbl=artPeriodLabel();
+  const b=document.getElementById('art-period-badge');if(b)b.textContent=lbl;
+  const s1=document.getElementById('art-chart-sub');if(s1)s1.textContent=lbl;
+  const s2=document.getElementById('art-pie-sub');if(s2)s2.textContent=lbl;
+
+  const colHeaders = cols.map(c=>({label:ART_YEAR_LABELS[c]||c}));
+  const headers=[
+    {label:'#',sortable:false},{label:'Artiste'},{label:'Label'},{label:'Distrib.'},
+    {label:'Tracks'},{label:'Streams'},{label:'CA ('+lbl+')'},{label:'%'},
+    ...colHeaders,{label:'Évol.',sortable:false}
+  ];
+
+  makeSortable('artists-tbl',headers,
+    ()=>sorted.map((a,i)=>{
+      const ca=a[key]||0;
+      const pct=total?Math.round(ca/total*100):0;
+      return{
+        _sort:[i,a.name,a.label,a.dist,a.tracks,a.streams,ca,pct,...cols.map(c=>a[c]||0),0],
+        _filter:{1:a.name,2:a.label,3:a.dist},
+        _raw:{a,ca,pct,i,key,cols,maxAll}
+      };
+    }),
+    row=>{
+      const{a,ca,pct,i,key:k,cols:cs,maxAll:mx}=row._raw;
+      const m=LM[a.label];const col=m?.color||'var(--ac)';
+      // Evolution vs previous year
+      const prevKey=ART_YEARS[ART_YEARS.indexOf(k)+1]||k;
+      const prev=a[prevKey]||0;
+      const evol=prev?((ca/prev-1)*100).toFixed(1):'—';
+      const up=parseFloat(evol)>=0;
+      const miniCols=cs.map(c=>{
+        const v=a[c]||0; const act=c===k;
+        const bw=mx?Math.round(v/mx*50):0;
+        return`<td style="${act?'background:rgba(232,255,71,.04);':''};padding:8px 10px;text-align:center">
+          <div style="display:flex;align-items:center;gap:4px;${act?'':'opacity:0.38'}">
+            <div style="width:${bw}px;height:3px;background:${act?col:'var(--mu)'};border-radius:3px;min-width:2px;flex-shrink:0"></div>
+            <span style="font-size:10px;color:${act?'var(--tx)':'var(--mu)'};font-weight:${act?'700':'400'};white-space:nowrap">€${fmtK(v)}</span>
+          </div></td>`;
+      }).join('');
+      return`<tr>
+        <td><span class="rn">${i+1}</span></td>
+        <td><strong style="font-family:'Bricolage Grotesque';font-size:13px">${a.name}</strong></td>
+        <td>${lpill(a.label,true)}</td>
+        <td><span class="pill pn">${a.dist}</span></td>
+        <td style="color:var(--mu)">${a.tracks}</td>
+        <td><strong>${fmtK(a.streams)}</strong></td>
+        <td style="background:rgba(232,255,71,.03)"><strong style="font-family:'Bebas Neue';font-size:21px;color:${col}">€${fmtK(ca)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:52px"><div class="pf" style="width:${pct}%;background:${col}"></div></div><span class="pp" style="color:${col}">${pct}%</span></div></td>
+        ${miniCols}
+        <td style="text-align:center">${evol==='—'?`<span style="color:var(--mu);font-size:11px">—</span>`:`<span style="font-size:11px;font-weight:700;color:${up?'var(--ok)':'var(--er)'}">${up?'↑':'↓'}${Math.abs(+evol)}%</span>`}</td>
+      </tr>`;
+    }
+  ).render();
+
+  // Update charts
+  const colors=sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+  if(CHARTS.arc){CHARTS.arc.data.labels=sorted.map(a=>a.name);CHARTS.arc.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.arc.data.datasets[0].backgroundColor=colors.map(c=>c+'bb');CHARTS.arc.update();}
+  if(CHARTS.apie){CHARTS.apie.data.labels=sorted.map(a=>a.name);CHARTS.apie.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.apie.data.datasets[0].backgroundColor=colors;CHARTS.apie.update();}
+}
+
+function setArtistGran(btn, gran){
+  curArtistGran=gran;
+  document.querySelectorAll('#art-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildArtistsTable();
+}
+
+function setArtistYear(yr){
+  curArtistYear=yr;
+  buildArtistsTable();
+}
+
+// Legacy stub (no longer called by HTML but keep for safety)
+function setArtistPeriod(p){ buildArtistsTable(); }
+
+// ── LABELS TABLE ──────────────────────────────────────────────────────────────
+function buildLabelsTable(){
+  const totStr=LABELS_DATA.reduce((s,l)=>s+l.streaming,0);
+  const headers=[
+    {label:'Label'},{label:'Statut'},{label:'Distributeurs'},{label:'Tracks'},
+    {label:'Streams'},{label:'CA Streaming'},{label:'% streaming'},
+    {label:'€/K str.'},{label:'Obj./track'},{label:'✓ OK'},{label:'En cours'},{label:'Urgent'}
+  ];
+  makeSortable('labels-tbl',headers,
+    ()=>LABELS_DATA.map(l=>{
+      const m=LM[l.name];
+      const pct=Math.round(l.streaming/totStr*100);
+      const rate=+(l.streaming/(l.streams/1000)).toFixed(2);
+      const allT=TRACKS.filter(t=>t.label===l.name);
+      const okT=allT.filter(t=>m?.goal&&t.streams>=m.goal).length;
+      const inT=allT.filter(t=>m?.goal&&t.streams>=m.goal*.3&&t.streams<m.goal).length;
+      const urT=allT.filter(t=>m?.goal&&t.streams<m.goal*.3).length;
+      return{_sort:[l.name,l.status,l.dist,l.tracks,l.streams,l.streaming,pct,rate,l.goal||0,okT,inT,urT],
+        _filter:{0:l.name,1:l.status,2:l.dist},_raw:{l,m,pct,rate,okT,inT,urT}};
+    }),
+    row=>{
+      const {l,m,pct,rate,okT,inT,urT}=row._raw;
+      const isA=l.status==='Actif';
+      const goalStr=l.goal?`<span style="background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.18);color:var(--ac);padding:2px 7px;border-radius:4px;font-size:10px">${fmtK(l.goal)}</span>`:`<span class="pill pn">—</span>`;
+      return`<tr>
+        <td>${lpill(l.name,true)}</td>
+        <td><span class="pill ${isA?'ps':'pn'}">${l.status}</span></td>
+        <td style="font-size:10px;color:var(--mu)">${l.dist}</td>
+        <td style="color:var(--mu)">${l.tracks}</td>
+        <td><strong>${fmtK(l.streams)}</strong></td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:var(--ac)">€${fmtK(l.streaming)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:68px"><div class="pf" style="width:${pct}%;background:${m?.color||'var(--mu)'}"></div></div><span class="pp" style="color:${m?.color||'var(--mu)'}">${pct}%</span></div></td>
+        <td style="color:var(--mu)">€${rate}</td>
+        <td>${goalStr}</td>
+        <td style="color:var(--ok);font-weight:700">${okT}</td>
+        <td style="color:var(--wa);font-weight:700">${inT}</td>
+        <td style="color:${urT>0?'var(--er)':'var(--mu)'};font-weight:700">${urT}</td>
+      </tr>`;
+    },{defaultCol:5,defaultDir:-1}
+  ).render();
+}
+
+// ── ALERTS ────────────────────────────────────────────────────────────────────
+let alertFilter='all';
+function renderAlerts(){
+  const search=document.getElementById('alert-search')?.value||'';
+  let items=ALERTS.filter(a=>{
+    if(alertFilter==='critical')return a.type==='critical';
+    if(alertFilter==='warn')    return a.type==='warn';
+    if(alertFilter==='success') return a.type==='success';
+    return true;
+  });
+  if(search)items=items.filter(a=>(a.title+a.desc+a.meta).toLowerCase().includes(search.toLowerCase()));
+
+  const tmap={critical:{ico:'d',border:'unread-crit'},warn:{ico:'w',border:'unread-warn'},success:{ico:'s',border:'unread-ok'}};
+  const icoClr={d:'rgba(255,77,109,.12)',w:'rgba(255,170,0,.12)',s:'rgba(0,212,170,.12)'};
+  const html=items.map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:'unread-info'};
+    return`<div class="ai${a.read?'':' '+t.border}">
+      ${a.read?'':`<div style="width:6px;height:6px;border-radius:50%;background:var(--er);flex-shrink:0;margin-top:9px"></div>`}
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'}">${a.icon}</div>
+      <div style="flex:1">
+        <div class="at">${a.title}</div>
+        <div class="ad">${a.desc}</div>
+        <div class="atm">${a.meta}${a.label?' · '+lpill(a.label,true):''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${a.read?`<span style="font-size:9px;color:var(--mu)">Lu ✓</span>`:`<button class="btn btn-g btn-s" onclick="markRead(${a.id})">Marquer lu</button>`}
+      </div>
+    </div>`;
+  }).join('')||`<div style="padding:20px;text-align:center;color:var(--mu)">Aucune alerte</div>`;
+
+  const list=document.getElementById('alerts-list');if(list)list.innerHTML=html;
+
+  // Overview mini-list (4 items)
+  const oList=document.getElementById('overview-alerts');
+  if(oList)oList.innerHTML=ALERTS.slice(0,4).map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:''};
+    return`<div class="ai${a.read?'':' '+t.border}" style="padding:9px 14px">
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'};">${a.icon}</div>
+      <div style="flex:1"><div class="at" style="font-size:11px">${a.title}</div><div class="ad" style="font-size:10px">${a.meta}</div></div>
+    </div>`;
+  }).join('');
+
+  // Badge + KPIs
+  const unread=ALERTS.filter(x=>!x.read).length;
+  const nb=document.getElementById('alerts-nb');if(nb){nb.textContent=unread;nb.style.display=unread>0?'inline-flex':'none';}
+  const ov=document.getElementById('ov-alert-kv');if(ov)ov.textContent=unread;
+  const u=document.getElementById('ak-unread');if(u)u.textContent=unread;
+  const c=document.getElementById('ak-crit');if(c)c.textContent=ALERTS.filter(x=>x.type==='critical'&&!x.read).length;
+  const w=document.getElementById('ak-warn');if(w)w.textContent=ALERTS.filter(x=>x.type==='warn'&&!x.read).length;
+  const ok=document.getElementById('ak-ok');if(ok)ok.textContent=ALERTS.filter(x=>x.type==='success').length;
+}
+function filterAlerts(f,btn){
+  alertFilter=f;
+  document.querySelectorAll('#panel-alerts .btn').forEach(b=>{b.classList.remove('btn-p');b.classList.add('btn-g');});
+  if(btn){btn.classList.remove('btn-g');btn.classList.add('btn-p');}
+  renderAlerts();
+}
+function markRead(id){const a=ALERTS.find(x=>x.id===id);if(a)a.read=true;renderAlerts();}
+function markAllRead(){ALERTS.forEach(a=>a.read=true);renderAlerts();}
+
+// ── PROJECTION ────────────────────────────────────────────────────────────────
+// Projection removed — see Objectifs panel
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+Chart.defaults.color='#6a6a86';
+Chart.defaults.borderColor='#232332';
+const CHARTS={};
+const MOS=['Sep','Oct','Nov','Déc','Jan','Fév'];
+const M12=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+function grd(ctx,c){const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,c+'44');g.addColorStop(1,c+'00');return g;}
+
+function initCharts(){
+  const sc=document.getElementById('streamChart');
+  if(sc&&!CHARTS.sc){const ctx=sc.getContext('2d');CHARTS.sc=new Chart(ctx,{type:'line',data:{labels:MOS,datasets:[
+    {label:'Believe',  data:[920,1020,980,1280,1580,1740],borderColor:'#e8ff47',backgroundColor:grd(ctx,'#e8ff47'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Tunecore', data:[520,580,610,700,820,910], borderColor:'#7c5cfc',backgroundColor:grd(ctx,'#7c5cfc'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Alterk',   data:[340,390,420,510,610,720], borderColor:'#ff4d6d',backgroundColor:grd(ctx,'#ff4d6d'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Universal',data:[280,320,350,430,510,590], borderColor:'#ff9f43',backgroundColor:grd(ctx,'#ff9f43'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#232332'}},y:{grid:{color:'#232332'},ticks:{callback:v=>v+'K'}}}}});}
+
+  const pc=document.getElementById('platformChart');
+  if(pc&&!CHARTS.pc){CHARTS.pc=new Chart(pc.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple Music','Amazon','Deezer'],datasets:[{data:[50,21,17,12],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const st=document.getElementById('streamTimeline');
+  if(st&&!CHARTS.sc){
+    const ctx=st.getContext('2d');
+    // Init with current strGran/strYear selection
+    const periods = getAlterkPeriod();
+    const periodKeys = Object.keys(periods).sort();
+    function dspSplit(key, dspKey) {
+      return periodKeys.map(k=>{
+        const d=periods[k]; if(!d) return 0;
+        const tot=Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+        if(dspKey==='other'){
+          const known=(d.dsps?.['Spotify']||0)+(d.dsps?.['Deezer']||0)+(d.dsps?.['Apple Music']||0);
+          return Math.round(d.streams*(tot-known)/tot);
+        }
+        return Math.round(d.streams*(d.dsps?.[dspKey]||0)/tot);
+      });
+    }
+    CHARTS.sc=new Chart(ctx,{type:'bar',data:{
+      labels: periodKeys,
+      datasets:[
+        {label:'Spotify', data:dspSplit('Spotify','Spotify'),      backgroundColor:'rgba(29,185,84,.75)',  borderRadius:3,stack:'str'},
+        {label:'Deezer',  data:dspSplit('Deezer','Deezer'),        backgroundColor:'rgba(239,84,102,.75)', borderRadius:3,stack:'str'},
+        {label:'Apple',   data:dspSplit('Apple','Apple Music'),     backgroundColor:'rgba(252,60,68,.6)',   borderRadius:3,stack:'str'},
+        {label:'Autres',  data:dspSplit('other','other'),           backgroundColor:'rgba(150,150,150,.4)', borderRadius:3,stack:'str'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  // Revenue chart — stacked by type, dynamic
+  const rc=document.getElementById('revenueChart');
+  if(rc&&!CHARTS.rc){
+    const grouped=groupRevData();
+    CHARTS.rc=new Chart(rc.getContext('2d'),{type:'bar',data:{
+      labels:grouped.map(g=>g.period),
+      datasets:[
+        {label:'Streaming',  data:grouped.map(g=>g.streaming), backgroundColor:'rgba(232,255,71,.72)',borderRadius:3,stack:'rev'},
+        {label:'Publishing', data:grouped.map(g=>g.publishing),backgroundColor:'rgba(124,92,252,.72)',borderRadius:3,stack:'rev'},
+        {label:'Events',     data:grouped.map(g=>g.events),    backgroundColor:'rgba(255,159,67,.72)',borderRadius:3,stack:'rev'},
+        {label:'Autres',     data:grouped.map(g=>g.autres),    backgroundColor:'rgba(106,106,134,.6)', borderRadius:3,stack:'rev'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>'€'+fmtK(v)}}}}});
+  }
+
+  const pt=document.getElementById('platformTimeline');
+  if(pt&&!CHARTS.pt){CHARTS.pt=new Chart(pt.getContext('2d'),{type:'bar',data:{labels:MOS,datasets:[
+    {label:'Spotify',data:[1060,1180,1120,1380,1680,1860],backgroundColor:'#1DB95488',borderRadius:2},
+    {label:'Apple', data:[445,496,470,580,706,780], backgroundColor:'#FC3C4488',borderRadius:2},
+    {label:'Amazon',data:[382,424,402,493,601,668], backgroundColor:'#FF990088',borderRadius:2},
+    {label:'Deezer',data:[233,260,248,304,370,412], backgroundColor:'#EF546688',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>v+'K'}}},plugins:{legend:{labels:{font:{family:'DM Mono',size:10}}}}}});}
+
+  const prv=document.getElementById('platformRevChart');
+  if(prv&&!CHARTS.prv){CHARTS.prv=new Chart(prv.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple','Amazon','Deezer'],datasets:[{data:[184000,82000,63000,55000],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const arc=document.getElementById('artistRevChart');
+  if(arc&&!CHARTS.arc){
+    const _key=yearToKey(curArtistYear);
+    const _sorted=[...ARTISTS].sort((a,b)=>(b[_key]||0)-(a[_key]||0));
+    const _colors=_sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.arc=new Chart(arc.getContext('2d'),{type:'bar',data:{labels:_sorted.map(a=>a.name),datasets:[{label:'CA Streaming',data:_sorted.map(a=>a[_key]||0),backgroundColor:_colors.map(c=>c+'bb'),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const apie=document.getElementById('artistPieChart');
+  if(apie&&!CHARTS.apie){
+    const _key2=yearToKey(curArtistYear);
+    const _sorted2=[...ARTISTS].sort((a,b)=>(b[_key2]||0)-(a[_key2]||0));
+    const _colors2=_sorted2.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.apie=new Chart(apie.getContext('2d'),{type:'doughnut',data:{labels:_sorted2.map(a=>a.name),datasets:[{data:_sorted2.map(a=>a[_key2]||0),backgroundColor:_colors2,borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const lrc=document.getElementById('labelRevChart');
+  if(lrc&&!CHARTS.lrc){CHARTS.lrc=new Chart(lrc.getContext('2d'),{type:'bar',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{label:'CA Streaming',data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['rgba(232,255,71,.75)','rgba(124,92,252,.75)','rgba(0,212,170,.75)','rgba(255,159,67,.75)','rgba(107,107,134,.5)'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const lpie=document.getElementById('labelPieChart');
+  if(lpie&&!CHARTS.lpie){CHARTS.lpie=new Chart(lpie.getContext('2d'),{type:'doughnut',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['#e8ff47','#7c5cfc','#00d4aa','#ff9f43','#6a6a86'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const PAGE_TITLES={overview:'Vue globale',alerts:'Alertes',streams:'Streams',revenues:'Revenus',tracks:'Tracks · Objectifs',artists:'Artistes · CA Streaming',labels:'Labels · Streaming',platforms:'Plateformes',objectives:'Objectifs',import:'Import data'};
+
+function sp(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const panel=document.getElementById('panel-'+id);if(panel)panel.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+  if(id==='tracks')    buildTracksTable();
+  if(id==='streams')   {refreshStreamsPanel();setTimeout(initCharts,80);}
+  if(id==='revenues'){refreshRevPanel();setTimeout(initCharts,80);}
+  if(id==='artists')   buildArtistsTable();
+  if(id==='labels')    buildLabelsTable();
+  if(id==='alerts')    renderAlerts();
+  if(id!=='revenues')  setTimeout(initCharts,80);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadAllData);
+
+
+let revView='month', revYear=2026;
+
+function getRevData(){
+  let data=REV_ENTRIES;
+  if(revYear!=='all') data=data.filter(r=>r.year===revYear);
+  return data;
+}
+
+function groupRevData(){
+  const data=getRevData();
+  const groups={};
+  data.forEach(r=>{
+    const key=revView==='month'?r.month:revView==='quarter'?(r.year+' '+r.q):String(r.year);
+    if(!groups[key])groups[key]={period:key,streaming:0,publishing:0,events:0,autres:0,total:0};
+    groups[key][r.type]=(groups[key][r.type]||0)+r.amount;
+    groups[key].total+=r.amount;
+  });
+  return Object.values(groups).sort((a,b)=>a.period.localeCompare(b.period));
+}
+
+function setRevView(btn, view){
+  revView=view;
+  document.querySelectorAll('#rev-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshRevPanel();
+}
+
+function setRevYear(yr){
+  revYear=yr==='all'?'all':+yr||yr;
+  refreshRevPanel();
+}
+
+function refreshRevPanel(){
+  const grouped=groupRevData();
+  const title=document.getElementById('rev-chart-title');
+  const sub=document.getElementById('rev-tbl-sub');
+  const lbl=revView==='month'?'mensuel':revView==='quarter'?'par quarter':'annuel';
+  const yr=revYear==='all'?'Toutes années':revYear;
+  if(title)title.textContent=`CA ${lbl} ${yr} — par source`;
+  if(sub)sub.textContent=`${lbl.charAt(0).toUpperCase()+lbl.slice(1)} · ${yr} · ↑↓ Trier · filtrer`;
+
+  // Update KPIs
+  const data=getRevData();
+  const sum=(type)=>data.filter(r=>r.type===type).reduce((s,r)=>s+r.amount,0);
+  const ks=document.getElementById('rk-str');if(ks)ks.textContent='€'+fmtK(sum('streaming'));
+  const kp=document.getElementById('rk-pub');if(kp)kp.textContent='€'+fmtK(sum('publishing'));
+  const ke=document.getElementById('rk-ev');if(ke)ke.textContent='€'+fmtK(sum('events'));
+  const ko=document.getElementById('rk-oth');if(ko)ko.textContent='€'+fmtK(sum('autres'));
+
+  // Update chart
+  if(CHARTS.rc){
+    CHARTS.rc.data.labels=grouped.map(g=>g.period);
+    CHARTS.rc.data.datasets[0].data=grouped.map(g=>g.streaming);
+    CHARTS.rc.data.datasets[1].data=grouped.map(g=>g.publishing);
+    CHARTS.rc.data.datasets[2].data=grouped.map(g=>g.events);
+    CHARTS.rc.data.datasets[3].data=grouped.map(g=>g.autres);
+    CHARTS.rc.update();
+  }
+
+  buildRevenuesTable();
+}
+
+// ── REVENUES TABLE ─────────────────────────────────────────────────────────────
+function buildRevenuesTable(){
+  const data=getRevData();
+  const grouped=groupRevData();
+
+  const typeColors={streaming:'var(--ac)',publishing:'var(--a2)',events:'var(--a5)',autres:'var(--mu)'};
+  const typeLabels={streaming:'Streaming',publishing:'Publishing',events:'Events',autres:'Autres'};
+
+  const headers=[
+    {label:'Période'},{label:'Type'},{label:'Source / Distributeur'},
+    {label:'Label'},{label:'Artiste'},{label:'Description',sortable:false},
+    {label:'Montant'},{label:'% du total',sortable:false}
+  ];
+  const totalAll=data.reduce((s,r)=>s+r.amount,0);
+
+  makeSortable('revenues-tbl',headers,
+    ()=>data.map(r=>({
+      _sort:[r.month,r.type,r.source,r.label,r.artiste,'',r.amount,0],
+      _filter:{0:r.month,1:r.type,2:r.source,3:r.label,4:r.artiste},
+      _raw:r
+    })),
+    row=>{
+      const r=row._raw;
+      const col=typeColors[r.type]||'var(--mu)';
+      const pct=totalAll?Math.round(r.amount/totalAll*100):0;
+      const lm=LM[r.label];
+      return`<tr>
+        <td style="color:var(--mu)">${r.month}</td>
+        <td><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;background:${col}18;color:${col};border:1px solid ${col}44">${typeLabels[r.type]||r.type}</span></td>
+        <td><span class="pill pn" style="font-size:10px">${r.source}</span></td>
+        <td>${lm?`<span class="pill ${lm.cls}" style="font-size:9px">${r.label}</span>`:r.label}</td>
+        <td style="color:var(--mu)">${r.artiste}</td>
+        <td style="color:var(--mu);font-size:11px">${r.desc||'—'}</td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:${col}">€${fmtK(r.amount)}</strong></td>
+        <td><span style="font-size:11px;color:var(--mu)">${pct}%</span></td>
+      </tr>`;
+    },{defaultCol:6,defaultDir:-1}
+  ).render();
+}
+
+// ── IMPORT WIZARD JS ──────────────────────────────────────────────────────────
+let selDist='believe', selPubSrc='alterk-pub', selOtherType='teg';
+
+function selectImportType(type){
+  ['streaming','publishing','events','other'].forEach(t=>{
+    document.getElementById('itype-'+t)?.classList.remove('active');
+    const sec=document.getElementById('imp-'+t);if(sec)sec.style.display='none';
+  });
+  document.getElementById('itype-'+type)?.classList.add('active');
+  const sec=document.getElementById('imp-'+type);if(sec)sec.style.display='block';
+}
+
+function selectDist(d){
+  selDist=d;
+  ['believe','tunecore','alterk','universal'].forEach(x=>document.getElementById('dp-'+x)?.classList.remove('active'));
+  document.getElementById('dp-'+d)?.classList.add('active');
+  const info={believe:'Believe · CSV mensuel · ISRC artiste DSP streams revenus',tunecore:'Tunecore · CSV trimestriel · UPC territoire quantité nets',alterk:'Alterk · XLSX mensuel · label DSP streams royalties',universal:'Universal · CSV mensuel · format UMG ISRC territoire DSP'};
+  const hint={believe:'CSV · format Believe accepté',tunecore:'CSV · format Tunecore accepté',alterk:'XLSX · mapping requis',universal:'CSV · format UMG accepté'};
+  const el1=document.getElementById('str-dist-info');if(el1)el1.textContent=info[d]||d;
+  const el2=document.getElementById('str-file-hint');if(el2)el2.textContent=hint[d]||d;
+}
+
+function selectPubSource(s){
+  selPubSrc=s;
+  ['alterk-pub','sony-mp'].forEach(x=>document.getElementById('pp-'+x.replace('-pub','').replace('-mp',''))?.classList.remove('active'));
+  if(s==='alterk-pub'){document.getElementById('pp-alterk')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Alterk Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='CSV / XLSX · format Alterk Publishing';}
+  else{document.getElementById('pp-sony')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Sony Music Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='Format SMP · propriétaire SonyATV';}
+}
+
+function selectOtherType(t){
+  selOtherType=t;
+  ['teg','sx','merch'].forEach(x=>document.getElementById('oth-'+x)?.classList.remove('active'));
+  const map={teg:'oth-teg',soundexchange:'oth-sx',merch:'oth-merch'};
+  document.getElementById(map[t]||'oth-teg')?.classList.add('active');
+  const labels={teg:'Type : Droits voisins (TEG / ADAMI / SPEDIDAM)',soundexchange:'Type : SoundExchange — droits numériques US',merch:'Type : Ventes marchandises / produits dérivés'};
+  const hints={teg:'PDF · CSV · format TEG ADAMI SPEDIDAM',soundexchange:'CSV · format SoundExchange',merch:'CSV · XLSX · rapport de ventes'};
+  const el=document.getElementById('other-type-label');if(el)el.textContent=labels[t]||t;
+  const h=document.getElementById('other-file-hint');if(h)h.textContent=hints[t]||t;
+}
+
+// ── ARTISTS TABLE ─────────────────────────────────────────────────────────────
+// Years available in ARTISTS data (most recent first for column display)
+const ART_YEARS = ['ytd','y2025','y2024','y2023','y2022','y2021','y2020','y2019','y2018','y2017'];
+const ART_YEAR_LABELS = {ytd:'YTD 2026',y2025:'2025',y2024:'2024',y2023:'2023',y2022:'2022',y2021:'2021',y2020:'2020',y2019:'2019',y2018:'2018',y2017:'2017'};
+
+let curArtistGran = 'quarter'; // month | quarter | year
+let curArtistYear = '2026';    // 2017-2026 | all
+
+// Map year select value → ARTISTS key
+function yearToKey(yr){
+  if(yr==='2026'||yr==='all') return 'ytd';
+  return 'y'+yr;
+}
+
+// Which columns to show in the mini-bar sparkline section (last 5 visible years)
+function getArtistCols(){
+  return ART_YEARS.slice(0,5); // ytd, 2025, 2024, 2023, 2022
+}
+
+function artPeriodLabel(){
+  const gran={'month':'Mois','quarter':'Quarter','year':'Année'}[curArtistGran]||curArtistGran;
+  const yr=curArtistYear==='all'?'Toutes années':curArtistYear;
+  return gran+' · '+yr;
+}
+
+function buildArtistsTable(){
+  const key = yearToKey(curArtistYear);
+  const cols = getArtistCols();
+  const sorted=[...ARTISTS].sort((a,b)=>(b[key]||0)-(a[key]||0));
+  const total=sorted.reduce((s,a)=>s+(a[key]||0),0);
+  const maxAll=Math.max(...ARTISTS.flatMap(x=>cols.map(c=>x[c]||0)));
+
+  // Update KPIs
+  const top=sorted[0];
+  const topPct=total?Math.round((top[key]||0)/total*100):0;
+  const kv=document.getElementById('ak-total');if(kv)kv.textContent='€'+fmtK(total);
+  const tv=document.getElementById('ak-top-val');if(tv)tv.textContent='€'+fmtK(top[key]||0);
+  const tn=document.getElementById('ak-top-name');if(tn)tn.textContent=top.name+' · '+topPct+'%';
+
+  // Update badge & subtitles
+  const lbl=artPeriodLabel();
+  const b=document.getElementById('art-period-badge');if(b)b.textContent=lbl;
+  const s1=document.getElementById('art-chart-sub');if(s1)s1.textContent=lbl;
+  const s2=document.getElementById('art-pie-sub');if(s2)s2.textContent=lbl;
+
+  const colHeaders = cols.map(c=>({label:ART_YEAR_LABELS[c]||c}));
+  const headers=[
+    {label:'#',sortable:false},{label:'Artiste'},{label:'Label'},{label:'Distrib.'},
+    {label:'Tracks'},{label:'Streams'},{label:'CA ('+lbl+')'},{label:'%'},
+    ...colHeaders,{label:'Évol.',sortable:false}
+  ];
+
+  makeSortable('artists-tbl',headers,
+    ()=>sorted.map((a,i)=>{
+      const ca=a[key]||0;
+      const pct=total?Math.round(ca/total*100):0;
+      return{
+        _sort:[i,a.name,a.label,a.dist,a.tracks,a.streams,ca,pct,...cols.map(c=>a[c]||0),0],
+        _filter:{1:a.name,2:a.label,3:a.dist},
+        _raw:{a,ca,pct,i,key,cols,maxAll}
+      };
+    }),
+    row=>{
+      const{a,ca,pct,i,key:k,cols:cs,maxAll:mx}=row._raw;
+      const m=LM[a.label];const col=m?.color||'var(--ac)';
+      // Evolution vs previous year
+      const prevKey=ART_YEARS[ART_YEARS.indexOf(k)+1]||k;
+      const prev=a[prevKey]||0;
+      const evol=prev?((ca/prev-1)*100).toFixed(1):'—';
+      const up=parseFloat(evol)>=0;
+      const miniCols=cs.map(c=>{
+        const v=a[c]||0; const act=c===k;
+        const bw=mx?Math.round(v/mx*50):0;
+        return`<td style="${act?'background:rgba(232,255,71,.04);':''};padding:8px 10px;text-align:center">
+          <div style="display:flex;align-items:center;gap:4px;${act?'':'opacity:0.38'}">
+            <div style="width:${bw}px;height:3px;background:${act?col:'var(--mu)'};border-radius:3px;min-width:2px;flex-shrink:0"></div>
+            <span style="font-size:10px;color:${act?'var(--tx)':'var(--mu)'};font-weight:${act?'700':'400'};white-space:nowrap">€${fmtK(v)}</span>
+          </div></td>`;
+      }).join('');
+      return`<tr>
+        <td><span class="rn">${i+1}</span></td>
+        <td><strong style="font-family:'Bricolage Grotesque';font-size:13px">${a.name}</strong></td>
+        <td>${lpill(a.label,true)}</td>
+        <td><span class="pill pn">${a.dist}</span></td>
+        <td style="color:var(--mu)">${a.tracks}</td>
+        <td><strong>${fmtK(a.streams)}</strong></td>
+        <td style="background:rgba(232,255,71,.03)"><strong style="font-family:'Bebas Neue';font-size:21px;color:${col}">€${fmtK(ca)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:52px"><div class="pf" style="width:${pct}%;background:${col}"></div></div><span class="pp" style="color:${col}">${pct}%</span></div></td>
+        ${miniCols}
+        <td style="text-align:center">${evol==='—'?`<span style="color:var(--mu);font-size:11px">—</span>`:`<span style="font-size:11px;font-weight:700;color:${up?'var(--ok)':'var(--er)'}">${up?'↑':'↓'}${Math.abs(+evol)}%</span>`}</td>
+      </tr>`;
+    }
+  ).render();
+
+  // Update charts
+  const colors=sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+  if(CHARTS.arc){CHARTS.arc.data.labels=sorted.map(a=>a.name);CHARTS.arc.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.arc.data.datasets[0].backgroundColor=colors.map(c=>c+'bb');CHARTS.arc.update();}
+  if(CHARTS.apie){CHARTS.apie.data.labels=sorted.map(a=>a.name);CHARTS.apie.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.apie.data.datasets[0].backgroundColor=colors;CHARTS.apie.update();}
+}
+
+function setArtistGran(btn, gran){
+  curArtistGran=gran;
+  document.querySelectorAll('#art-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildArtistsTable();
+}
+
+function setArtistYear(yr){
+  curArtistYear=yr;
+  buildArtistsTable();
+}
+
+// Legacy stub (no longer called by HTML but keep for safety)
+function setArtistPeriod(p){ buildArtistsTable(); }
+
+// ── LABELS TABLE ──────────────────────────────────────────────────────────────
+function buildLabelsTable(){
+  const totStr=LABELS_DATA.reduce((s,l)=>s+l.streaming,0);
+  const headers=[
+    {label:'Label'},{label:'Statut'},{label:'Distributeurs'},{label:'Tracks'},
+    {label:'Streams'},{label:'CA Streaming'},{label:'% streaming'},
+    {label:'€/K str.'},{label:'Obj./track'},{label:'✓ OK'},{label:'En cours'},{label:'Urgent'}
+  ];
+  makeSortable('labels-tbl',headers,
+    ()=>LABELS_DATA.map(l=>{
+      const m=LM[l.name];
+      const pct=Math.round(l.streaming/totStr*100);
+      const rate=+(l.streaming/(l.streams/1000)).toFixed(2);
+      const allT=TRACKS.filter(t=>t.label===l.name);
+      const okT=allT.filter(t=>m?.goal&&t.streams>=m.goal).length;
+      const inT=allT.filter(t=>m?.goal&&t.streams>=m.goal*.3&&t.streams<m.goal).length;
+      const urT=allT.filter(t=>m?.goal&&t.streams<m.goal*.3).length;
+      return{_sort:[l.name,l.status,l.dist,l.tracks,l.streams,l.streaming,pct,rate,l.goal||0,okT,inT,urT],
+        _filter:{0:l.name,1:l.status,2:l.dist},_raw:{l,m,pct,rate,okT,inT,urT}};
+    }),
+    row=>{
+      const {l,m,pct,rate,okT,inT,urT}=row._raw;
+      const isA=l.status==='Actif';
+      const goalStr=l.goal?`<span style="background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.18);color:var(--ac);padding:2px 7px;border-radius:4px;font-size:10px">${fmtK(l.goal)}</span>`:`<span class="pill pn">—</span>`;
+      return`<tr>
+        <td>${lpill(l.name,true)}</td>
+        <td><span class="pill ${isA?'ps':'pn'}">${l.status}</span></td>
+        <td style="font-size:10px;color:var(--mu)">${l.dist}</td>
+        <td style="color:var(--mu)">${l.tracks}</td>
+        <td><strong>${fmtK(l.streams)}</strong></td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:var(--ac)">€${fmtK(l.streaming)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:68px"><div class="pf" style="width:${pct}%;background:${m?.color||'var(--mu)'}"></div></div><span class="pp" style="color:${m?.color||'var(--mu)'}">${pct}%</span></div></td>
+        <td style="color:var(--mu)">€${rate}</td>
+        <td>${goalStr}</td>
+        <td style="color:var(--ok);font-weight:700">${okT}</td>
+        <td style="color:var(--wa);font-weight:700">${inT}</td>
+        <td style="color:${urT>0?'var(--er)':'var(--mu)'};font-weight:700">${urT}</td>
+      </tr>`;
+    },{defaultCol:5,defaultDir:-1}
+  ).render();
+}
+
+// ── ALERTS ────────────────────────────────────────────────────────────────────
+let alertFilter='all';
+function renderAlerts(){
+  const search=document.getElementById('alert-search')?.value||'';
+  let items=ALERTS.filter(a=>{
+    if(alertFilter==='critical')return a.type==='critical';
+    if(alertFilter==='warn')    return a.type==='warn';
+    if(alertFilter==='success') return a.type==='success';
+    return true;
+  });
+  if(search)items=items.filter(a=>(a.title+a.desc+a.meta).toLowerCase().includes(search.toLowerCase()));
+
+  const tmap={critical:{ico:'d',border:'unread-crit'},warn:{ico:'w',border:'unread-warn'},success:{ico:'s',border:'unread-ok'}};
+  const icoClr={d:'rgba(255,77,109,.12)',w:'rgba(255,170,0,.12)',s:'rgba(0,212,170,.12)'};
+  const html=items.map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:'unread-info'};
+    return`<div class="ai${a.read?'':' '+t.border}">
+      ${a.read?'':`<div style="width:6px;height:6px;border-radius:50%;background:var(--er);flex-shrink:0;margin-top:9px"></div>`}
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'}">${a.icon}</div>
+      <div style="flex:1">
+        <div class="at">${a.title}</div>
+        <div class="ad">${a.desc}</div>
+        <div class="atm">${a.meta}${a.label?' · '+lpill(a.label,true):''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${a.read?`<span style="font-size:9px;color:var(--mu)">Lu ✓</span>`:`<button class="btn btn-g btn-s" onclick="markRead(${a.id})">Marquer lu</button>`}
+      </div>
+    </div>`;
+  }).join('')||`<div style="padding:20px;text-align:center;color:var(--mu)">Aucune alerte</div>`;
+
+  const list=document.getElementById('alerts-list');if(list)list.innerHTML=html;
+
+  // Overview mini-list (4 items)
+  const oList=document.getElementById('overview-alerts');
+  if(oList)oList.innerHTML=ALERTS.slice(0,4).map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:''};
+    return`<div class="ai${a.read?'':' '+t.border}" style="padding:9px 14px">
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'};">${a.icon}</div>
+      <div style="flex:1"><div class="at" style="font-size:11px">${a.title}</div><div class="ad" style="font-size:10px">${a.meta}</div></div>
+    </div>`;
+  }).join('');
+
+  // Badge + KPIs
+  const unread=ALERTS.filter(x=>!x.read).length;
+  const nb=document.getElementById('alerts-nb');if(nb){nb.textContent=unread;nb.style.display=unread>0?'inline-flex':'none';}
+  const ov=document.getElementById('ov-alert-kv');if(ov)ov.textContent=unread;
+  const u=document.getElementById('ak-unread');if(u)u.textContent=unread;
+  const c=document.getElementById('ak-crit');if(c)c.textContent=ALERTS.filter(x=>x.type==='critical'&&!x.read).length;
+  const w=document.getElementById('ak-warn');if(w)w.textContent=ALERTS.filter(x=>x.type==='warn'&&!x.read).length;
+  const ok=document.getElementById('ak-ok');if(ok)ok.textContent=ALERTS.filter(x=>x.type==='success').length;
+}
+function filterAlerts(f,btn){
+  alertFilter=f;
+  document.querySelectorAll('#panel-alerts .btn').forEach(b=>{b.classList.remove('btn-p');b.classList.add('btn-g');});
+  if(btn){btn.classList.remove('btn-g');btn.classList.add('btn-p');}
+  renderAlerts();
+}
+function markRead(id){const a=ALERTS.find(x=>x.id===id);if(a)a.read=true;renderAlerts();}
+function markAllRead(){ALERTS.forEach(a=>a.read=true);renderAlerts();}
+
+// ── PROJECTION ────────────────────────────────────────────────────────────────
+// Projection removed — see Objectifs panel
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+Chart.defaults.color='#6a6a86';
+Chart.defaults.borderColor='#232332';
+const CHARTS={};
+const MOS=['Sep','Oct','Nov','Déc','Jan','Fév'];
+const M12=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+function grd(ctx,c){const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,c+'44');g.addColorStop(1,c+'00');return g;}
+
+function initCharts(){
+  const sc=document.getElementById('streamChart');
+  if(sc&&!CHARTS.sc){const ctx=sc.getContext('2d');CHARTS.sc=new Chart(ctx,{type:'line',data:{labels:MOS,datasets:[
+    {label:'Believe',  data:[920,1020,980,1280,1580,1740],borderColor:'#e8ff47',backgroundColor:grd(ctx,'#e8ff47'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Tunecore', data:[520,580,610,700,820,910], borderColor:'#7c5cfc',backgroundColor:grd(ctx,'#7c5cfc'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Alterk',   data:[340,390,420,510,610,720], borderColor:'#ff4d6d',backgroundColor:grd(ctx,'#ff4d6d'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Universal',data:[280,320,350,430,510,590], borderColor:'#ff9f43',backgroundColor:grd(ctx,'#ff9f43'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#232332'}},y:{grid:{color:'#232332'},ticks:{callback:v=>v+'K'}}}}});}
+
+  const pc=document.getElementById('platformChart');
+  if(pc&&!CHARTS.pc){CHARTS.pc=new Chart(pc.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple Music','Amazon','Deezer'],datasets:[{data:[50,21,17,12],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const st=document.getElementById('streamTimeline');
+  if(st&&!CHARTS.sc){
+    const ctx=st.getContext('2d');
+    // Init with current strGran/strYear selection
+    const periods = getAlterkPeriod();
+    const periodKeys = Object.keys(periods).sort();
+    function dspSplit(key, dspKey) {
+      return periodKeys.map(k=>{
+        const d=periods[k]; if(!d) return 0;
+        const tot=Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+        if(dspKey==='other'){
+          const known=(d.dsps?.['Spotify']||0)+(d.dsps?.['Deezer']||0)+(d.dsps?.['Apple Music']||0);
+          return Math.round(d.streams*(tot-known)/tot);
+        }
+        return Math.round(d.streams*(d.dsps?.[dspKey]||0)/tot);
+      });
+    }
+    CHARTS.sc=new Chart(ctx,{type:'bar',data:{
+      labels: periodKeys,
+      datasets:[
+        {label:'Spotify', data:dspSplit('Spotify','Spotify'),      backgroundColor:'rgba(29,185,84,.75)',  borderRadius:3,stack:'str'},
+        {label:'Deezer',  data:dspSplit('Deezer','Deezer'),        backgroundColor:'rgba(239,84,102,.75)', borderRadius:3,stack:'str'},
+        {label:'Apple',   data:dspSplit('Apple','Apple Music'),     backgroundColor:'rgba(252,60,68,.6)',   borderRadius:3,stack:'str'},
+        {label:'Autres',  data:dspSplit('other','other'),           backgroundColor:'rgba(150,150,150,.4)', borderRadius:3,stack:'str'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  // Revenue chart — stacked by type, dynamic
+  const rc=document.getElementById('revenueChart');
+  if(rc&&!CHARTS.rc){
+    const grouped=groupRevData();
+    CHARTS.rc=new Chart(rc.getContext('2d'),{type:'bar',data:{
+      labels:grouped.map(g=>g.period),
+      datasets:[
+        {label:'Streaming',  data:grouped.map(g=>g.streaming), backgroundColor:'rgba(232,255,71,.72)',borderRadius:3,stack:'rev'},
+        {label:'Publishing', data:grouped.map(g=>g.publishing),backgroundColor:'rgba(124,92,252,.72)',borderRadius:3,stack:'rev'},
+        {label:'Events',     data:grouped.map(g=>g.events),    backgroundColor:'rgba(255,159,67,.72)',borderRadius:3,stack:'rev'},
+        {label:'Autres',     data:grouped.map(g=>g.autres),    backgroundColor:'rgba(106,106,134,.6)', borderRadius:3,stack:'rev'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>'€'+fmtK(v)}}}}});
+  }
+
+  const pt=document.getElementById('platformTimeline');
+  if(pt&&!CHARTS.pt){CHARTS.pt=new Chart(pt.getContext('2d'),{type:'bar',data:{labels:MOS,datasets:[
+    {label:'Spotify',data:[1060,1180,1120,1380,1680,1860],backgroundColor:'#1DB95488',borderRadius:2},
+    {label:'Apple', data:[445,496,470,580,706,780], backgroundColor:'#FC3C4488',borderRadius:2},
+    {label:'Amazon',data:[382,424,402,493,601,668], backgroundColor:'#FF990088',borderRadius:2},
+    {label:'Deezer',data:[233,260,248,304,370,412], backgroundColor:'#EF546688',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>v+'K'}}},plugins:{legend:{labels:{font:{family:'DM Mono',size:10}}}}}});}
+
+  const prv=document.getElementById('platformRevChart');
+  if(prv&&!CHARTS.prv){CHARTS.prv=new Chart(prv.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple','Amazon','Deezer'],datasets:[{data:[184000,82000,63000,55000],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const arc=document.getElementById('artistRevChart');
+  if(arc&&!CHARTS.arc){
+    const _key=yearToKey(curArtistYear);
+    const _sorted=[...ARTISTS].sort((a,b)=>(b[_key]||0)-(a[_key]||0));
+    const _colors=_sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.arc=new Chart(arc.getContext('2d'),{type:'bar',data:{labels:_sorted.map(a=>a.name),datasets:[{label:'CA Streaming',data:_sorted.map(a=>a[_key]||0),backgroundColor:_colors.map(c=>c+'bb'),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const apie=document.getElementById('artistPieChart');
+  if(apie&&!CHARTS.apie){
+    const _key2=yearToKey(curArtistYear);
+    const _sorted2=[...ARTISTS].sort((a,b)=>(b[_key2]||0)-(a[_key2]||0));
+    const _colors2=_sorted2.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.apie=new Chart(apie.getContext('2d'),{type:'doughnut',data:{labels:_sorted2.map(a=>a.name),datasets:[{data:_sorted2.map(a=>a[_key2]||0),backgroundColor:_colors2,borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const lrc=document.getElementById('labelRevChart');
+  if(lrc&&!CHARTS.lrc){CHARTS.lrc=new Chart(lrc.getContext('2d'),{type:'bar',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{label:'CA Streaming',data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['rgba(232,255,71,.75)','rgba(124,92,252,.75)','rgba(0,212,170,.75)','rgba(255,159,67,.75)','rgba(107,107,134,.5)'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const lpie=document.getElementById('labelPieChart');
+  if(lpie&&!CHARTS.lpie){CHARTS.lpie=new Chart(lpie.getContext('2d'),{type:'doughnut',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['#e8ff47','#7c5cfc','#00d4aa','#ff9f43','#6a6a86'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const PAGE_TITLES={overview:'Vue globale',alerts:'Alertes',streams:'Streams',revenues:'Revenus',tracks:'Tracks · Objectifs',artists:'Artistes · CA Streaming',labels:'Labels · Streaming',platforms:'Plateformes',objectives:'Objectifs',import:'Import data'};
+
+function sp(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const panel=document.getElementById('panel-'+id);if(panel)panel.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+  if(id==='tracks')    buildTracksTable();
+  if(id==='streams')   {refreshStreamsPanel();setTimeout(initCharts,80);}
+  if(id==='revenues'){refreshRevPanel();setTimeout(initCharts,80);}
+  if(id==='artists')   buildArtistsTable();
+  if(id==='labels')    buildLabelsTable();
+  if(id==='alerts')    renderAlerts();
+  if(id!=='revenues')  setTimeout(initCharts,80);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAlerts();
+  buildTracksTable();
+  setTimeout(initCharts,80);
+});
+
+function fmtK(v){
+  if(v===null||v===undefined)return'—';
+  const a=Math.abs(v);
+  if(a>=1e6)return(v/1e6).toFixed(2)+'M';
+  if(a>=1e3)return(v/1e3%1===0?(v/1e3)+'K':(v/1e3).toFixed(0)+'K');
+  return v;
+}
+function daysSince(d){return Math.floor((Date.now()-new Date(d))/86400000);}
+function ageStr(d){const days=daysSince(d);if(days<30)return days+'j';if(days<365)return Math.floor(days/30)+'m';return(days/365).toFixed(1)+'an';}
+function lpill(lbl,small){const m=LM[lbl]||{cls:'pn'};return`<span class="pill ${m.cls}"${small?' style="font-size:9px"':''}>${lbl}</span>`;}
+function om(id){document.getElementById(id).classList.add('open')}
+function cm(id){document.getElementById(id).classList.remove('open')}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',3000)}
+function fakeUpload(d){toast('✓ Import '+d+' lancé')}
+function setPeriod(el,p){} // legacy stub
+
+// ── GLOBAL GRANULARITY (topbar) ──────────────────────────────────────────────
+let globalGran='quarter', globalYear='2026';
+
+function setGlobalGran(btn, gran){
+  globalGran=gran;
+  document.querySelectorAll('#global-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const lbl={'month':'Mois','quarter':'Quarter','year':'Année'}[gran]||gran;
+  const yr=globalYear==='all'?'Toutes années':globalYear;
+  document.getElementById('period-badge').textContent=lbl+' · '+yr;
+}
+
+function setGlobalYear(yr){
+  globalYear=yr;
+  const gran={'month':'Mois','quarter':'Quarter','year':'Année'}[globalGran]||globalGran;
+  const lbl=yr==='all'?'Toutes années':yr;
+  document.getElementById('period-badge').textContent=gran+' · '+lbl;
+}
+
+// ── SORTABLE TABLE ENGINE ──────────────────────────────────────────────────────
+function makeSortable(containerId, headers, dataFn, rowFn, opts={}){
+  let col=opts.defaultCol||0, dir=opts.defaultDir||-1;
+  let filters={};
+
+  function render(){
+    const raw=dataFn();
+    let data=raw.filter(r=>
+      Object.entries(filters).every(([ci,v])=>{
+        if(!v)return true;
+        const cell=String(r._filter&&r._filter[ci]!==undefined?r._filter[ci]:r._sort?.[ci]??'').toLowerCase();
+        return cell.includes(v.toLowerCase());
+      })
+    );
+    data.sort((a,b)=>{
+      const va=a._sort?.[col]??'', vb=b._sort?.[col]??'';
+      return typeof va==='number'&&typeof vb==='number'?(va-vb)*dir:String(va).localeCompare(String(vb))*dir;
+    });
+
+    const wrap=document.getElementById(containerId);
+    if(!wrap)return;
+
+    const thead=`<thead>
+      <tr>${headers.map((h,i)=>`<th${h.sortable===false?' class="no-sort"':''} data-i="${i}">
+        ${h.label}${h.sortable!==false&&i===col?(dir===1?' ↑':' ↓'):''}</th>`).join('')}</tr>
+      <tr class="frow">${headers.map((_,i)=>`<th><input type="text" placeholder="…" data-fi="${i}" value="${filters[i]||''}"></th>`).join('')}</tr>
+    </thead>`;
+    const tbody=`<tbody>${data.map(r=>rowFn(r)).join('')}</tbody>`;
+    wrap.innerHTML=`<table>${thead}${tbody}</table>`;
+
+    wrap.querySelectorAll('thead tr:first-child th:not(.no-sort)').forEach(th=>{
+      th.style.cursor='pointer';
+      th.addEventListener('click',()=>{
+        const ci=+th.dataset.i;
+        if(ci===col)dir=-dir;else{col=ci;dir=-1;}
+        render();
+      });
+    });
+    wrap.querySelectorAll('.frow input').forEach(inp=>{
+      inp.addEventListener('input',()=>{filters[+inp.dataset.fi]=inp.value;render();});
+      inp.addEventListener('click',e=>e.stopPropagation());
+    });
+  }
+  return {render};
+}
+
+// ── TRACKS TABLE ──────────────────────────────────────────────────────────────
+let trackFilter='all', tracksInst;
+function buildTracksTable(){
+  const headers=[
+    {label:'Track'},{label:'Artiste'},{label:'Label'},{label:'Distrib.'},
+    {label:'Sortie'},{label:'Âge'},{label:'Streams'},{label:'Objectif'},
+    {label:'%'},{label:'Statut',sortable:false},{label:'Action',sortable:false}
+  ];
+  tracksInst=makeSortable('tracks-tbl',headers,
+    ()=>TRACKS.filter(t=>{
+      const m=LM[t.label];const p=m?.goal?t.streams/m.goal*100:null;
+      if(trackFilter==='over')  return p!==null&&p>=100;
+      if(trackFilter==='ok')    return p!==null&&p>=30&&p<100;
+      if(trackFilter==='under') return p!==null&&p>=15&&p<30;
+      if(trackFilter==='urgent')return p!==null&&p<15;
+      return true;
+    }).map(t=>{
+      const m=LM[t.label];const goal=m?.goal||0;
+      const p=goal?Math.round(t.streams/goal*100):null;
+      return{_sort:[t.name,t.artist,t.label,t.dist,t.release,daysSince(t.release),t.streams,goal,p??-1,'',''],
+        _filter:{0:t.name,1:t.artist,2:t.label,3:t.dist},_raw:{t,m,goal,p}};
+    }),
+    r=>{
+      const {t,m,goal,p}=r._raw;
+      const bc=p>=100?'var(--ok)':p>=30?'var(--wa)':'var(--er)';
+      const status=p===null?`<span class="pill pn">—</span>`:p>=100?`<span class="pill ps">🚀 Atteint</span>`:p>=80?`<span class="pill ps">↑ Sur cible</span>`:p>=30?`<span class="pill pw">◎ En route</span>`:p>=15?`<span class="pill pd">⚠ Sous-perf</span>`:`<span class="pill pd">🔔 Urgent</span>`;
+      const action=p===null?'':p>=100?`<button class="btn btn-g btn-s" style="color:var(--ok)">Amplifier</button>`:p<30?`<button class="btn btn-g btn-s" style="color:var(--er)">Repush !</button>`:`<button class="btn btn-g btn-s">Booster</button>`;
+      return`<tr>
+        <td><strong style="font-family:'Bricolage Grotesque';font-size:13px">${t.name}</strong></td>
+        <td style="color:var(--mu)">${t.artist}</td>
+        <td>${lpill(t.label,true)}</td>
+        <td><span class="pill pn">${t.dist}</span></td>
+        <td style="color:var(--mu);font-size:11px">${t.release}</td>
+        <td style="color:var(--mu)">${ageStr(t.release)}</td>
+        <td><strong>${fmtK(t.streams)}</strong></td>
+        <td>${goal?`<span style="background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.18);color:var(--ac);padding:2px 7px;border-radius:4px;font-size:10px">${fmtK(goal)}</span>`:'—'}</td>
+        <td>${p!==null?`<div class="pw2"><div class="pt2" style="width:88px"><div class="pf" style="width:${Math.min(p,100)}%;background:${bc}"></div></div><span class="pp" style="color:${bc}">${p}%</span></div>`:'—'}</td>
+        <td>${status}</td><td>${action}</td>
+      </tr>`;
+    },{defaultCol:6,defaultDir:-1}
+  );
+  tracksInst.render();
+}
+function setTrackFilter(f){trackFilter=f;if(tracksInst)tracksInst.render();}
+
+// ── STREAMS TABLE ─────────────────────────────────────────────────────────────
+// ── ALTERK REAL DATA ──────────────────────────────────────────────────────────
+function getAlterkPeriod() {
+  const src = strGran === 'month' ? ALTERK_DATA.months
+            : strGran === 'quarter' ? ALTERK_DATA.quarters
+            : ALTERK_DATA.years;
+  if (strYear === 'all') {
+    // merge all periods
+    const merged = {royalty:0, streams:0, video:0, dsps:{}, artists:{}, tracks:[]};
+    const trackMap = {};
+    Object.values(src).forEach(d => {
+      merged.royalty += d.royalty;
+      merged.streams += d.streams;
+      merged.video   += d.video;
+      Object.entries(d.dsps||{}).forEach(([k,v]) => merged.dsps[k] = (merged.dsps[k]||0)+v);
+      Object.entries(d.artists||{}).forEach(([k,v]) => merged.artists[k] = (merged.artists[k]||0)+v);
+      (d.tracks||[]).forEach(t => {
+        const k = t.title+'|'+t.artist;
+        if (!trackMap[k]) trackMap[k] = {title:t.title,artist:t.artist,royalty:0,streams:0};
+        trackMap[k].royalty += t.royalty;
+        trackMap[k].streams += t.streams;
+      });
+    });
+    merged.tracks = Object.values(trackMap).sort((a,b)=>b.streams-a.streams);
+    return {'all': merged};
+  }
+  // filter by year
+  const filtered = {};
+  Object.entries(src).forEach(([k,v]) => {
+    if (k.startsWith(strYear)) filtered[k] = v;
+  });
+  return filtered;
+}
+
+function setStrGran(btn, gran) {
+  strGran = gran;
+  document.querySelectorAll('#str-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshStreamsPanel();
+}
+function setStrYear(yr) { strYear = yr; refreshStreamsPanel(); }
+
+function refreshStreamsPanel() {
+  const periods = getAlterkPeriod();
+  const periodKeys = Object.keys(periods).sort();
+  const labels = periodKeys;
+
+  // Aggregate totals for KPIs
+  let totalStreams=0, totalRoyalty=0, totalVideo=0;
+  const dspTotals = {};
+  const trackMap = {};
+  periods && Object.values(periods).forEach(d => {
+    totalStreams  += d.streams;
+    totalRoyalty  += d.royalty;
+    totalVideo    += d.video;
+    Object.entries(d.dsps||{}).forEach(([k,v]) => dspTotals[k]=(dspTotals[k]||0)+v);
+    (d.tracks||[]).forEach(t => {
+      const k = t.title+'|'+t.artist;
+      if (!trackMap[k]) trackMap[k]={title:t.title,artist:t.artist,royalty:0,streams:0};
+      trackMap[k].royalty+=t.royalty; trackMap[k].streams+=t.streams;
+    });
+  });
+
+  // KPIs
+  const kSpot=document.getElementById('kpi-spotify'); if(kSpot) kSpot.textContent=fmtK(Math.round((dspTotals['Spotify']||0)/0.004))+'';
+  const kDee=document.getElementById('kpi-deezer');   if(kDee)  kDee.textContent=fmtK(Math.round((dspTotals['Deezer']||0)/0.004))+'';
+  const kApl=document.getElementById('kpi-apple');    if(kApl)  kApl.textContent=fmtK(Math.round((dspTotals['Apple Music']||0)/0.006))+'';
+  const kYt=document.getElementById('kpi-youtube');   if(kYt)   kYt.textContent=fmtK(totalVideo)+'';
+  // show royalty in subtitle
+  const lbl = strYear==='all'?'Toutes années':strYear;
+  const gran = {month:'mois',quarter:'quarter',year:'an'}[strGran];
+  const titEl=document.getElementById('str-chart-title'); if(titEl) titEl.textContent=`Streams & royalties par ${gran} · ${lbl}`;
+  const tblEl=document.getElementById('str-tbl-title');   if(tblEl) tblEl.textContent=`Top tracks · Alterk · ${lbl}`;
+
+  // Chart — streams per period stacked by DSP (approximate split from royalty ratios)
+  const chartLabels = periodKeys;
+  const spotifyData = periodKeys.map(k => {
+    const d = periods[k]; if(!d) return 0;
+    const tot = Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+    return Math.round(d.streams * (d.dsps?.['Spotify']||0) / tot);
+  });
+  const deezerData = periodKeys.map(k => {
+    const d = periods[k]; if(!d) return 0;
+    const tot = Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+    return Math.round(d.streams * (d.dsps?.['Deezer']||0) / tot);
+  });
+  const appleData = periodKeys.map(k => {
+    const d = periods[k]; if(!d) return 0;
+    const tot = Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+    return Math.round(d.streams * (d.dsps?.['Apple Music']||0) / tot);
+  });
+  const otherData = periodKeys.map(k => {
+    const d = periods[k]; if(!d) return 0;
+    const tot = Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+    const known = (d.dsps?.['Spotify']||0)+(d.dsps?.['Deezer']||0)+(d.dsps?.['Apple Music']||0);
+    return Math.round(d.streams * (tot-known) / tot);
+  });
+
+  if (CHARTS.sc) {
+    CHARTS.sc.data.labels = chartLabels;
+    CHARTS.sc.data.datasets[0].data = spotifyData;
+    CHARTS.sc.data.datasets[1].data = deezerData;
+    CHARTS.sc.data.datasets[2].data = appleData;
+    CHARTS.sc.data.datasets[3].data = otherData;
+    CHARTS.sc.update();
+  }
+
+  buildStreamsTable(trackMap);
+}
+
+function buildStreamsTable(trackMapArg) {
+  const periods = getAlterkPeriod();
+  const trackMap = trackMapArg || {};
+  if (!trackMapArg) {
+    Object.values(periods).forEach(d => {
+      (d.tracks||[]).forEach(t => {
+        const k=t.title+'|'+t.artist;
+        if(!trackMap[k]) trackMap[k]={title:t.title,artist:t.artist,royalty:0,streams:0};
+        trackMap[k].royalty+=t.royalty; trackMap[k].streams+=t.streams;
+      });
+    });
+  }
+  const tracks = Object.values(trackMap).sort((a,b)=>b.streams-a.streams);
+  const maxStr = tracks[0]?.streams || 1;
+
+  const headers = [
+    {label:'#',sortable:false},{label:'Track'},{label:'Artiste'},
+    {label:'Streams'},{label:'Royalties €'},{label:'€/K str',sortable:false},{label:'Barre',sortable:false}
+  ];
+  makeSortable('streams-tbl', headers,
+    () => tracks.map((t,i) => ({
+      _sort: [i, t.title, t.artist, t.streams, t.royalty, 0, 0],
+      _filter: {1:t.title, 2:t.artist},
+      _raw: {t, i, maxStr}
+    })),
+    row => {
+      const {t, i, maxStr:mx} = row._raw;
+      const pct = Math.round(t.streams/mx*100);
+      const rpm = t.streams ? (t.royalty/(t.streams/1000)).toFixed(3) : '—';
+      return `<tr>
+        <td style="color:var(--mu)">${i+1}</td>
+        <td><strong style="font-family:'Bricolage Grotesque'">${t.title}</strong></td>
+        <td style="color:var(--mu);font-size:11px">${t.artist}</td>
+        <td><strong style="font-family:'Bebas Neue';font-size:19px;color:#1DB954">${fmtK(t.streams)}</strong></td>
+        <td style="color:var(--ac)"><strong>€${t.royalty.toFixed(2)}</strong></td>
+        <td style="color:var(--mu);font-size:11px">€${rpm}</td>
+        <td style="min-width:80px"><div style="background:rgba(29,185,84,.15);border-radius:3px;height:6px;width:100%"><div style="background:#1DB954;border-radius:3px;height:6px;width:${pct}%"></div></div></td>
+      </tr>`;
+    }, {defaultCol:3, defaultDir:-1}
+  ).render();
+}
+
+// ── REVENUES DATA (enriched per type/period) ──────────────────────────────────
+const REV_ENTRIES = [
+  // Streaming
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:44000},
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:21000},
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'streaming', source:'Alterk',   label:'Avorio',         artiste:'Artiste E', amount:10000},
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'streaming', source:'Universal',label:'Kimono',         artiste:'Artiste D', amount:8200},
+  {date:'2026-02',year:2026,q:'Q1',month:'Fév 2026',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:36000},
+  {date:'2026-02',year:2026,q:'Q1',month:'Fév 2026',  type:'streaming', source:'Universal',label:'Kimono',         artiste:'Artiste D', amount:15000},
+  // Publishing
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:11000},
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'publishing',source:'Sony MP',  label:'Echo',           artiste:'Artiste C', amount:5200},
+  {date:'2026-02',year:2026,q:'Q1',month:'Fév 2026',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste B', amount:9000},
+  // Events
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'events',    source:'Facture',  label:'Get The Sound', artiste:'Artiste A', amount:3200, desc:'Festival Hiver 2026'},
+  {date:'2026-02',year:2026,q:'Q1',month:'Fév 2026',  type:'events',    source:'Facture',  label:'Echo',           artiste:'Artiste C', amount:2000, desc:'Showcase Club X'},
+  // Autres
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'autres',    source:'Droits voisins (TEG)', label:'Global', artiste:'—', amount:8000},
+  {date:'2026-01',year:2026,q:'Q1',month:'Jan 2026',  type:'autres',    source:'SoundExchange', label:'Get The Sound', artiste:'Artiste A', amount:4200},
+  {date:'2026-02',year:2026,q:'Q1',month:'Fév 2026',  type:'autres',    source:'Marchandises', label:'Get The Sound', artiste:'Artiste A', amount:1500, desc:'Ventes vinyles'},
+  // 2025 data
+  {date:'2025-12',year:2025,q:'Q4',month:'Déc 2025',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:38000},
+  {date:'2025-12',year:2025,q:'Q4',month:'Déc 2025',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:9500},
+  {date:'2025-11',year:2025,q:'Q4',month:'Nov 2025',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:35000},
+  {date:'2025-10',year:2025,q:'Q4',month:'Oct 2025',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:19000},
+  {date:'2025-09',year:2025,q:'Q3',month:'Sep 2025',  type:'events',    source:'Facture',  label:'Echo',           artiste:'Artiste C', amount:4500, desc:'Tournée automne'},
+  {date:'2025-06',year:2025,q:'Q2',month:'Jun 2025',  type:'autres',    source:'SoundExchange', label:'Kimono',   artiste:'Artiste D', amount:3800},
+  {date:'2025-03',year:2025,q:'Q1',month:'Mar 2025',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:12000},
+  {date:'2025-03',year:2025,q:'Q1',month:'Mar 2025',  type:'publishing',source:'Sony MP',  label:'Echo',           artiste:'Artiste C', amount:3200},
+  // 2024 data
+  {date:'2024-12',year:2024,q:'Q4',month:'Déc 2024',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:29000},
+  {date:'2024-09',year:2024,q:'Q3',month:'Sep 2024',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:7200},
+  {date:'2024-06',year:2024,q:'Q2',month:'Jun 2024',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:9500},
+  {date:'2024-06',year:2024,q:'Q2',month:'Jun 2024',  type:'events',    source:'Facture',  label:'Get The Sound', artiste:'Artiste A', amount:6000, desc:'Festival été 2024'},
+  {date:'2024-03',year:2024,q:'Q1',month:'Mar 2024',  type:'autres',    source:'Droits voisins (TEG)', label:'Global', artiste:'—', amount:4800},
+  // 2023 data
+  {date:'2023-12',year:2023,q:'Q4',month:'Déc 2023',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:17000},
+  {date:'2023-09',year:2023,q:'Q3',month:'Sep 2023',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:4500},
+  {date:'2023-06',year:2023,q:'Q2',month:'Jun 2023',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:7000},
+  {date:'2023-03',year:2023,q:'Q1',month:'Mar 2023',  type:'events',    source:'Facture',  label:'Kimono',         artiste:'Artiste D', amount:2800, desc:'Showcase Q1 2023'},
+  // 2022 data
+  {date:'2022-12',year:2022,q:'Q4',month:'Déc 2022',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:11000},
+  {date:'2022-09',year:2022,q:'Q3',month:'Sep 2022',  type:'publishing',source:'Sony MP',  label:'Echo',           artiste:'Artiste C', amount:3000},
+  {date:'2022-06',year:2022,q:'Q2',month:'Jun 2022',  type:'streaming', source:'Alterk',   label:'Avorio',         artiste:'Artiste E', amount:3500},
+  {date:'2022-03',year:2022,q:'Q1',month:'Mar 2022',  type:'autres',    source:'SoundExchange', label:'Get The Sound', artiste:'Artiste A', amount:2200},
+  // 2021 data
+  {date:'2021-12',year:2021,q:'Q4',month:'Déc 2021',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:7000},
+  {date:'2021-09',year:2021,q:'Q3',month:'Sep 2021',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:1800},
+  {date:'2021-06',year:2021,q:'Q2',month:'Jun 2021',  type:'streaming', source:'Tunecore', label:'Echo',           artiste:'Artiste C', amount:2500},
+  // 2020 data
+  {date:'2020-12',year:2020,q:'Q4',month:'Déc 2020',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:4200},
+  {date:'2020-06',year:2020,q:'Q2',month:'Jun 2020',  type:'autres',    source:'Droits voisins (TEG)', label:'Global', artiste:'—', amount:1400},
+  // 2019 data
+  {date:'2019-12',year:2019,q:'Q4',month:'Déc 2019',  type:'streaming', source:'Believe',  label:'Get The Sound', artiste:'Artiste A', amount:1800},
+  {date:'2019-09',year:2019,q:'Q3',month:'Sep 2019',  type:'publishing',source:'Alterk Publishing', label:'Get The Sound', artiste:'Artiste A', amount:600},
+  // 2018 data
+  {date:'2018-12',year:2018,q:'Q4',month:'Déc 2018',  type:'streaming', source:'Believe',  label:'Willow',         artiste:'Artiste H', amount:500},
+  // 2017 data
+  {date:'2017-12',year:2017,q:'Q4',month:'Déc 2017',  type:'streaming', source:'Believe',  label:'Willow',         artiste:'Artiste H', amount:200},
+];
+
+let revView='month', revYear=2026;
+
+function getRevData(){
+  let data=REV_ENTRIES;
+  if(revYear!=='all') data=data.filter(r=>r.year===revYear);
+  return data;
+}
+
+function groupRevData(){
+  const data=getRevData();
+  const groups={};
+  data.forEach(r=>{
+    const key=revView==='month'?r.month:revView==='quarter'?(r.year+' '+r.q):String(r.year);
+    if(!groups[key])groups[key]={period:key,streaming:0,publishing:0,events:0,autres:0,total:0};
+    groups[key][r.type]=(groups[key][r.type]||0)+r.amount;
+    groups[key].total+=r.amount;
+  });
+  return Object.values(groups).sort((a,b)=>a.period.localeCompare(b.period));
+}
+
+function setRevView(btn, view){
+  revView=view;
+  document.querySelectorAll('#rev-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshRevPanel();
+}
+
+function setRevYear(yr){
+  revYear=yr==='all'?'all':+yr||yr;
+  refreshRevPanel();
+}
+
+function refreshRevPanel(){
+  const grouped=groupRevData();
+  const title=document.getElementById('rev-chart-title');
+  const sub=document.getElementById('rev-tbl-sub');
+  const lbl=revView==='month'?'mensuel':revView==='quarter'?'par quarter':'annuel';
+  const yr=revYear==='all'?'Toutes années':revYear;
+  if(title)title.textContent=`CA ${lbl} ${yr} — par source`;
+  if(sub)sub.textContent=`${lbl.charAt(0).toUpperCase()+lbl.slice(1)} · ${yr} · ↑↓ Trier · filtrer`;
+
+  // Update KPIs
+  const data=getRevData();
+  const sum=(type)=>data.filter(r=>r.type===type).reduce((s,r)=>s+r.amount,0);
+  const ks=document.getElementById('rk-str');if(ks)ks.textContent='€'+fmtK(sum('streaming'));
+  const kp=document.getElementById('rk-pub');if(kp)kp.textContent='€'+fmtK(sum('publishing'));
+  const ke=document.getElementById('rk-ev');if(ke)ke.textContent='€'+fmtK(sum('events'));
+  const ko=document.getElementById('rk-oth');if(ko)ko.textContent='€'+fmtK(sum('autres'));
+
+  // Update chart
+  if(CHARTS.rc){
+    CHARTS.rc.data.labels=grouped.map(g=>g.period);
+    CHARTS.rc.data.datasets[0].data=grouped.map(g=>g.streaming);
+    CHARTS.rc.data.datasets[1].data=grouped.map(g=>g.publishing);
+    CHARTS.rc.data.datasets[2].data=grouped.map(g=>g.events);
+    CHARTS.rc.data.datasets[3].data=grouped.map(g=>g.autres);
+    CHARTS.rc.update();
+  }
+
+  buildRevenuesTable();
+}
+
+// ── REVENUES TABLE ─────────────────────────────────────────────────────────────
+function buildRevenuesTable(){
+  const data=getRevData();
+  const grouped=groupRevData();
+
+  const typeColors={streaming:'var(--ac)',publishing:'var(--a2)',events:'var(--a5)',autres:'var(--mu)'};
+  const typeLabels={streaming:'Streaming',publishing:'Publishing',events:'Events',autres:'Autres'};
+
+  const headers=[
+    {label:'Période'},{label:'Type'},{label:'Source / Distributeur'},
+    {label:'Label'},{label:'Artiste'},{label:'Description',sortable:false},
+    {label:'Montant'},{label:'% du total',sortable:false}
+  ];
+  const totalAll=data.reduce((s,r)=>s+r.amount,0);
+
+  makeSortable('revenues-tbl',headers,
+    ()=>data.map(r=>({
+      _sort:[r.month,r.type,r.source,r.label,r.artiste,'',r.amount,0],
+      _filter:{0:r.month,1:r.type,2:r.source,3:r.label,4:r.artiste},
+      _raw:r
+    })),
+    row=>{
+      const r=row._raw;
+      const col=typeColors[r.type]||'var(--mu)';
+      const pct=totalAll?Math.round(r.amount/totalAll*100):0;
+      const lm=LM[r.label];
+      return`<tr>
+        <td style="color:var(--mu)">${r.month}</td>
+        <td><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;background:${col}18;color:${col};border:1px solid ${col}44">${typeLabels[r.type]||r.type}</span></td>
+        <td><span class="pill pn" style="font-size:10px">${r.source}</span></td>
+        <td>${lm?`<span class="pill ${lm.cls}" style="font-size:9px">${r.label}</span>`:r.label}</td>
+        <td style="color:var(--mu)">${r.artiste}</td>
+        <td style="color:var(--mu);font-size:11px">${r.desc||'—'}</td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:${col}">€${fmtK(r.amount)}</strong></td>
+        <td><span style="font-size:11px;color:var(--mu)">${pct}%</span></td>
+      </tr>`;
+    },{defaultCol:6,defaultDir:-1}
+  ).render();
+}
+
+// ── IMPORT WIZARD JS ──────────────────────────────────────────────────────────
+let selDist='believe', selPubSrc='alterk-pub', selOtherType='teg';
+
+function selectImportType(type){
+  ['streaming','publishing','events','other'].forEach(t=>{
+    document.getElementById('itype-'+t)?.classList.remove('active');
+    const sec=document.getElementById('imp-'+t);if(sec)sec.style.display='none';
+  });
+  document.getElementById('itype-'+type)?.classList.add('active');
+  const sec=document.getElementById('imp-'+type);if(sec)sec.style.display='block';
+}
+
+function selectDist(d){
+  selDist=d;
+  ['believe','tunecore','alterk','universal'].forEach(x=>document.getElementById('dp-'+x)?.classList.remove('active'));
+  document.getElementById('dp-'+d)?.classList.add('active');
+  const info={believe:'Believe · CSV mensuel · ISRC artiste DSP streams revenus',tunecore:'Tunecore · CSV trimestriel · UPC territoire quantité nets',alterk:'Alterk · XLSX mensuel · label DSP streams royalties',universal:'Universal · CSV mensuel · format UMG ISRC territoire DSP'};
+  const hint={believe:'CSV · format Believe accepté',tunecore:'CSV · format Tunecore accepté',alterk:'XLSX · mapping requis',universal:'CSV · format UMG accepté'};
+  const el1=document.getElementById('str-dist-info');if(el1)el1.textContent=info[d]||d;
+  const el2=document.getElementById('str-file-hint');if(el2)el2.textContent=hint[d]||d;
+}
+
+function selectPubSource(s){
+  selPubSrc=s;
+  ['alterk-pub','sony-mp'].forEach(x=>document.getElementById('pp-'+x.replace('-pub','').replace('-mp',''))?.classList.remove('active'));
+  if(s==='alterk-pub'){document.getElementById('pp-alterk')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Alterk Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='CSV / XLSX · format Alterk Publishing';}
+  else{document.getElementById('pp-sony')?.classList.add('active');const el=document.getElementById('pub-source-info');if(el)el.textContent='Source : Sony Music Publishing';const h=document.getElementById('pub-file-hint');if(h)h.textContent='Format SMP · propriétaire SonyATV';}
+}
+
+function selectOtherType(t){
+  selOtherType=t;
+  ['teg','sx','merch'].forEach(x=>document.getElementById('oth-'+x)?.classList.remove('active'));
+  const map={teg:'oth-teg',soundexchange:'oth-sx',merch:'oth-merch'};
+  document.getElementById(map[t]||'oth-teg')?.classList.add('active');
+  const labels={teg:'Type : Droits voisins (TEG / ADAMI / SPEDIDAM)',soundexchange:'Type : SoundExchange — droits numériques US',merch:'Type : Ventes marchandises / produits dérivés'};
+  const hints={teg:'PDF · CSV · format TEG ADAMI SPEDIDAM',soundexchange:'CSV · format SoundExchange',merch:'CSV · XLSX · rapport de ventes'};
+  const el=document.getElementById('other-type-label');if(el)el.textContent=labels[t]||t;
+  const h=document.getElementById('other-file-hint');if(h)h.textContent=hints[t]||t;
+}
+
+// ── ARTISTS TABLE ─────────────────────────────────────────────────────────────
+// Years available in ARTISTS data (most recent first for column display)
+const ART_YEARS = ['ytd','y2025','y2024','y2023','y2022','y2021','y2020','y2019','y2018','y2017'];
+const ART_YEAR_LABELS = {ytd:'YTD 2026',y2025:'2025',y2024:'2024',y2023:'2023',y2022:'2022',y2021:'2021',y2020:'2020',y2019:'2019',y2018:'2018',y2017:'2017'};
+
+let curArtistGran = 'quarter'; // month | quarter | year
+let curArtistYear = '2026';    // 2017-2026 | all
+
+// Map year select value → ARTISTS key
+function yearToKey(yr){
+  if(yr==='2026'||yr==='all') return 'ytd';
+  return 'y'+yr;
+}
+
+// Which columns to show in the mini-bar sparkline section (last 5 visible years)
+function getArtistCols(){
+  return ART_YEARS.slice(0,5); // ytd, 2025, 2024, 2023, 2022
+}
+
+function artPeriodLabel(){
+  const gran={'month':'Mois','quarter':'Quarter','year':'Année'}[curArtistGran]||curArtistGran;
+  const yr=curArtistYear==='all'?'Toutes années':curArtistYear;
+  return gran+' · '+yr;
+}
+
+function buildArtistsTable(){
+  const key = yearToKey(curArtistYear);
+  const cols = getArtistCols();
+  const sorted=[...ARTISTS].sort((a,b)=>(b[key]||0)-(a[key]||0));
+  const total=sorted.reduce((s,a)=>s+(a[key]||0),0);
+  const maxAll=Math.max(...ARTISTS.flatMap(x=>cols.map(c=>x[c]||0)));
+
+  // Update KPIs
+  const top=sorted[0];
+  const topPct=total?Math.round((top[key]||0)/total*100):0;
+  const kv=document.getElementById('ak-total');if(kv)kv.textContent='€'+fmtK(total);
+  const tv=document.getElementById('ak-top-val');if(tv)tv.textContent='€'+fmtK(top[key]||0);
+  const tn=document.getElementById('ak-top-name');if(tn)tn.textContent=top.name+' · '+topPct+'%';
+
+  // Update badge & subtitles
+  const lbl=artPeriodLabel();
+  const b=document.getElementById('art-period-badge');if(b)b.textContent=lbl;
+  const s1=document.getElementById('art-chart-sub');if(s1)s1.textContent=lbl;
+  const s2=document.getElementById('art-pie-sub');if(s2)s2.textContent=lbl;
+
+  const colHeaders = cols.map(c=>({label:ART_YEAR_LABELS[c]||c}));
+  const headers=[
+    {label:'#',sortable:false},{label:'Artiste'},{label:'Label'},{label:'Distrib.'},
+    {label:'Tracks'},{label:'Streams'},{label:'CA ('+lbl+')'},{label:'%'},
+    ...colHeaders,{label:'Évol.',sortable:false}
+  ];
+
+  makeSortable('artists-tbl',headers,
+    ()=>sorted.map((a,i)=>{
+      const ca=a[key]||0;
+      const pct=total?Math.round(ca/total*100):0;
+      return{
+        _sort:[i,a.name,a.label,a.dist,a.tracks,a.streams,ca,pct,...cols.map(c=>a[c]||0),0],
+        _filter:{1:a.name,2:a.label,3:a.dist},
+        _raw:{a,ca,pct,i,key,cols,maxAll}
+      };
+    }),
+    row=>{
+      const{a,ca,pct,i,key:k,cols:cs,maxAll:mx}=row._raw;
+      const m=LM[a.label];const col=m?.color||'var(--ac)';
+      // Evolution vs previous year
+      const prevKey=ART_YEARS[ART_YEARS.indexOf(k)+1]||k;
+      const prev=a[prevKey]||0;
+      const evol=prev?((ca/prev-1)*100).toFixed(1):'—';
+      const up=parseFloat(evol)>=0;
+      const miniCols=cs.map(c=>{
+        const v=a[c]||0; const act=c===k;
+        const bw=mx?Math.round(v/mx*50):0;
+        return`<td style="${act?'background:rgba(232,255,71,.04);':''};padding:8px 10px;text-align:center">
+          <div style="display:flex;align-items:center;gap:4px;${act?'':'opacity:0.38'}">
+            <div style="width:${bw}px;height:3px;background:${act?col:'var(--mu)'};border-radius:3px;min-width:2px;flex-shrink:0"></div>
+            <span style="font-size:10px;color:${act?'var(--tx)':'var(--mu)'};font-weight:${act?'700':'400'};white-space:nowrap">€${fmtK(v)}</span>
+          </div></td>`;
+      }).join('');
+      return`<tr>
+        <td><span class="rn">${i+1}</span></td>
+        <td><strong style="font-family:'Bricolage Grotesque';font-size:13px">${a.name}</strong></td>
+        <td>${lpill(a.label,true)}</td>
+        <td><span class="pill pn">${a.dist}</span></td>
+        <td style="color:var(--mu)">${a.tracks}</td>
+        <td><strong>${fmtK(a.streams)}</strong></td>
+        <td style="background:rgba(232,255,71,.03)"><strong style="font-family:'Bebas Neue';font-size:21px;color:${col}">€${fmtK(ca)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:52px"><div class="pf" style="width:${pct}%;background:${col}"></div></div><span class="pp" style="color:${col}">${pct}%</span></div></td>
+        ${miniCols}
+        <td style="text-align:center">${evol==='—'?`<span style="color:var(--mu);font-size:11px">—</span>`:`<span style="font-size:11px;font-weight:700;color:${up?'var(--ok)':'var(--er)'}">${up?'↑':'↓'}${Math.abs(+evol)}%</span>`}</td>
+      </tr>`;
+    }
+  ).render();
+
+  // Update charts
+  const colors=sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+  if(CHARTS.arc){CHARTS.arc.data.labels=sorted.map(a=>a.name);CHARTS.arc.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.arc.data.datasets[0].backgroundColor=colors.map(c=>c+'bb');CHARTS.arc.update();}
+  if(CHARTS.apie){CHARTS.apie.data.labels=sorted.map(a=>a.name);CHARTS.apie.data.datasets[0].data=sorted.map(a=>a[key]||0);CHARTS.apie.data.datasets[0].backgroundColor=colors;CHARTS.apie.update();}
+}
+
+function setArtistGran(btn, gran){
+  curArtistGran=gran;
+  document.querySelectorAll('#art-gran-tabs .ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildArtistsTable();
+}
+
+function setArtistYear(yr){
+  curArtistYear=yr;
+  buildArtistsTable();
+}
+
+// Legacy stub (no longer called by HTML but keep for safety)
+function setArtistPeriod(p){ buildArtistsTable(); }
+
+// ── LABELS TABLE ──────────────────────────────────────────────────────────────
+function buildLabelsTable(){
+  const totStr=LABELS_DATA.reduce((s,l)=>s+l.streaming,0);
+  const headers=[
+    {label:'Label'},{label:'Statut'},{label:'Distributeurs'},{label:'Tracks'},
+    {label:'Streams'},{label:'CA Streaming'},{label:'% streaming'},
+    {label:'€/K str.'},{label:'Obj./track'},{label:'✓ OK'},{label:'En cours'},{label:'Urgent'}
+  ];
+  makeSortable('labels-tbl',headers,
+    ()=>LABELS_DATA.map(l=>{
+      const m=LM[l.name];
+      const pct=Math.round(l.streaming/totStr*100);
+      const rate=+(l.streaming/(l.streams/1000)).toFixed(2);
+      const allT=TRACKS.filter(t=>t.label===l.name);
+      const okT=allT.filter(t=>m?.goal&&t.streams>=m.goal).length;
+      const inT=allT.filter(t=>m?.goal&&t.streams>=m.goal*.3&&t.streams<m.goal).length;
+      const urT=allT.filter(t=>m?.goal&&t.streams<m.goal*.3).length;
+      return{_sort:[l.name,l.status,l.dist,l.tracks,l.streams,l.streaming,pct,rate,l.goal||0,okT,inT,urT],
+        _filter:{0:l.name,1:l.status,2:l.dist},_raw:{l,m,pct,rate,okT,inT,urT}};
+    }),
+    row=>{
+      const {l,m,pct,rate,okT,inT,urT}=row._raw;
+      const isA=l.status==='Actif';
+      const goalStr=l.goal?`<span style="background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.18);color:var(--ac);padding:2px 7px;border-radius:4px;font-size:10px">${fmtK(l.goal)}</span>`:`<span class="pill pn">—</span>`;
+      return`<tr>
+        <td>${lpill(l.name,true)}</td>
+        <td><span class="pill ${isA?'ps':'pn'}">${l.status}</span></td>
+        <td style="font-size:10px;color:var(--mu)">${l.dist}</td>
+        <td style="color:var(--mu)">${l.tracks}</td>
+        <td><strong>${fmtK(l.streams)}</strong></td>
+        <td><strong style="font-family:'Bebas Neue';font-size:18px;color:var(--ac)">€${fmtK(l.streaming)}</strong></td>
+        <td><div class="pw2"><div class="pt2" style="width:68px"><div class="pf" style="width:${pct}%;background:${m?.color||'var(--mu)'}"></div></div><span class="pp" style="color:${m?.color||'var(--mu)'}">${pct}%</span></div></td>
+        <td style="color:var(--mu)">€${rate}</td>
+        <td>${goalStr}</td>
+        <td style="color:var(--ok);font-weight:700">${okT}</td>
+        <td style="color:var(--wa);font-weight:700">${inT}</td>
+        <td style="color:${urT>0?'var(--er)':'var(--mu)'};font-weight:700">${urT}</td>
+      </tr>`;
+    },{defaultCol:5,defaultDir:-1}
+  ).render();
+}
+
+// ── ALERTS ────────────────────────────────────────────────────────────────────
+let alertFilter='all';
+function renderAlerts(){
+  const search=document.getElementById('alert-search')?.value||'';
+  let items=ALERTS.filter(a=>{
+    if(alertFilter==='critical')return a.type==='critical';
+    if(alertFilter==='warn')    return a.type==='warn';
+    if(alertFilter==='success') return a.type==='success';
+    return true;
+  });
+  if(search)items=items.filter(a=>(a.title+a.desc+a.meta).toLowerCase().includes(search.toLowerCase()));
+
+  const tmap={critical:{ico:'d',border:'unread-crit'},warn:{ico:'w',border:'unread-warn'},success:{ico:'s',border:'unread-ok'}};
+  const icoClr={d:'rgba(255,77,109,.12)',w:'rgba(255,170,0,.12)',s:'rgba(0,212,170,.12)'};
+  const html=items.map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:'unread-info'};
+    return`<div class="ai${a.read?'':' '+t.border}">
+      ${a.read?'':`<div style="width:6px;height:6px;border-radius:50%;background:var(--er);flex-shrink:0;margin-top:9px"></div>`}
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'}">${a.icon}</div>
+      <div style="flex:1">
+        <div class="at">${a.title}</div>
+        <div class="ad">${a.desc}</div>
+        <div class="atm">${a.meta}${a.label?' · '+lpill(a.label,true):''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${a.read?`<span style="font-size:9px;color:var(--mu)">Lu ✓</span>`:`<button class="btn btn-g btn-s" onclick="markRead(${a.id})">Marquer lu</button>`}
+      </div>
+    </div>`;
+  }).join('')||`<div style="padding:20px;text-align:center;color:var(--mu)">Aucune alerte</div>`;
+
+  const list=document.getElementById('alerts-list');if(list)list.innerHTML=html;
+
+  // Overview mini-list (4 items)
+  const oList=document.getElementById('overview-alerts');
+  if(oList)oList.innerHTML=ALERTS.slice(0,4).map(a=>{
+    const t=tmap[a.type]||{ico:'i',border:''};
+    return`<div class="ai${a.read?'':' '+t.border}" style="padding:9px 14px">
+      <div class="aico" style="background:${icoClr[t.ico]||'rgba(124,92,252,.12)'};">${a.icon}</div>
+      <div style="flex:1"><div class="at" style="font-size:11px">${a.title}</div><div class="ad" style="font-size:10px">${a.meta}</div></div>
+    </div>`;
+  }).join('');
+
+  // Badge + KPIs
+  const unread=ALERTS.filter(x=>!x.read).length;
+  const nb=document.getElementById('alerts-nb');if(nb){nb.textContent=unread;nb.style.display=unread>0?'inline-flex':'none';}
+  const ov=document.getElementById('ov-alert-kv');if(ov)ov.textContent=unread;
+  const u=document.getElementById('ak-unread');if(u)u.textContent=unread;
+  const c=document.getElementById('ak-crit');if(c)c.textContent=ALERTS.filter(x=>x.type==='critical'&&!x.read).length;
+  const w=document.getElementById('ak-warn');if(w)w.textContent=ALERTS.filter(x=>x.type==='warn'&&!x.read).length;
+  const ok=document.getElementById('ak-ok');if(ok)ok.textContent=ALERTS.filter(x=>x.type==='success').length;
+}
+function filterAlerts(f,btn){
+  alertFilter=f;
+  document.querySelectorAll('#panel-alerts .btn').forEach(b=>{b.classList.remove('btn-p');b.classList.add('btn-g');});
+  if(btn){btn.classList.remove('btn-g');btn.classList.add('btn-p');}
+  renderAlerts();
+}
+function markRead(id){const a=ALERTS.find(x=>x.id===id);if(a)a.read=true;renderAlerts();}
+function markAllRead(){ALERTS.forEach(a=>a.read=true);renderAlerts();}
+
+// ── PROJECTION ────────────────────────────────────────────────────────────────
+// Projection removed — see Objectifs panel
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+Chart.defaults.color='#6a6a86';
+Chart.defaults.borderColor='#232332';
+const CHARTS={};
+const MOS=['Sep','Oct','Nov','Déc','Jan','Fév'];
+const M12=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+function grd(ctx,c){const g=ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,c+'44');g.addColorStop(1,c+'00');return g;}
+
+function initCharts(){
+  const sc=document.getElementById('streamChart');
+  if(sc&&!CHARTS.sc){const ctx=sc.getContext('2d');CHARTS.sc=new Chart(ctx,{type:'line',data:{labels:MOS,datasets:[
+    {label:'Believe',  data:[920,1020,980,1280,1580,1740],borderColor:'#e8ff47',backgroundColor:grd(ctx,'#e8ff47'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Tunecore', data:[520,580,610,700,820,910], borderColor:'#7c5cfc',backgroundColor:grd(ctx,'#7c5cfc'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Alterk',   data:[340,390,420,510,610,720], borderColor:'#ff4d6d',backgroundColor:grd(ctx,'#ff4d6d'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+    {label:'Universal',data:[280,320,350,430,510,590], borderColor:'#ff9f43',backgroundColor:grd(ctx,'#ff9f43'),tension:.4,pointRadius:3,borderWidth:2,fill:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#232332'}},y:{grid:{color:'#232332'},ticks:{callback:v=>v+'K'}}}}});}
+
+  const pc=document.getElementById('platformChart');
+  if(pc&&!CHARTS.pc){CHARTS.pc=new Chart(pc.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple Music','Amazon','Deezer'],datasets:[{data:[50,21,17,12],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const st=document.getElementById('streamTimeline');
+  if(st&&!CHARTS.sc){
+    const ctx=st.getContext('2d');
+    // Init with current strGran/strYear selection
+    const periods = getAlterkPeriod();
+    const periodKeys = Object.keys(periods).sort();
+    function dspSplit(key, dspKey) {
+      return periodKeys.map(k=>{
+        const d=periods[k]; if(!d) return 0;
+        const tot=Object.values(d.dsps||{}).reduce((s,v)=>s+v,0)||1;
+        if(dspKey==='other'){
+          const known=(d.dsps?.['Spotify']||0)+(d.dsps?.['Deezer']||0)+(d.dsps?.['Apple Music']||0);
+          return Math.round(d.streams*(tot-known)/tot);
+        }
+        return Math.round(d.streams*(d.dsps?.[dspKey]||0)/tot);
+      });
+    }
+    CHARTS.sc=new Chart(ctx,{type:'bar',data:{
+      labels: periodKeys,
+      datasets:[
+        {label:'Spotify', data:dspSplit('Spotify','Spotify'),      backgroundColor:'rgba(29,185,84,.75)',  borderRadius:3,stack:'str'},
+        {label:'Deezer',  data:dspSplit('Deezer','Deezer'),        backgroundColor:'rgba(239,84,102,.75)', borderRadius:3,stack:'str'},
+        {label:'Apple',   data:dspSplit('Apple','Apple Music'),     backgroundColor:'rgba(252,60,68,.6)',   borderRadius:3,stack:'str'},
+        {label:'Autres',  data:dspSplit('other','other'),           backgroundColor:'rgba(150,150,150,.4)', borderRadius:3,stack:'str'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>fmtK(v)}}}}});
+  }
+
+  // Revenue chart — stacked by type, dynamic
+  const rc=document.getElementById('revenueChart');
+  if(rc&&!CHARTS.rc){
+    const grouped=groupRevData();
+    CHARTS.rc=new Chart(rc.getContext('2d'),{type:'bar',data:{
+      labels:grouped.map(g=>g.period),
+      datasets:[
+        {label:'Streaming',  data:grouped.map(g=>g.streaming), backgroundColor:'rgba(232,255,71,.72)',borderRadius:3,stack:'rev'},
+        {label:'Publishing', data:grouped.map(g=>g.publishing),backgroundColor:'rgba(124,92,252,.72)',borderRadius:3,stack:'rev'},
+        {label:'Events',     data:grouped.map(g=>g.events),    backgroundColor:'rgba(255,159,67,.72)',borderRadius:3,stack:'rev'},
+        {label:'Autres',     data:grouped.map(g=>g.autres),    backgroundColor:'rgba(106,106,134,.6)', borderRadius:3,stack:'rev'},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>'€'+fmtK(v)}}}}});
+  }
+
+  const pt=document.getElementById('platformTimeline');
+  if(pt&&!CHARTS.pt){CHARTS.pt=new Chart(pt.getContext('2d'),{type:'bar',data:{labels:MOS,datasets:[
+    {label:'Spotify',data:[1060,1180,1120,1380,1680,1860],backgroundColor:'#1DB95488',borderRadius:2},
+    {label:'Apple', data:[445,496,470,580,706,780], backgroundColor:'#FC3C4488',borderRadius:2},
+    {label:'Amazon',data:[382,424,402,493,601,668], backgroundColor:'#FF990088',borderRadius:2},
+    {label:'Deezer',data:[233,260,248,304,370,412], backgroundColor:'#EF546688',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false},stacked:true},y:{grid:{color:'#232332'},stacked:true,ticks:{callback:v=>v+'K'}}},plugins:{legend:{labels:{font:{family:'DM Mono',size:10}}}}}});}
+
+  const prv=document.getElementById('platformRevChart');
+  if(prv&&!CHARTS.prv){CHARTS.prv=new Chart(prv.getContext('2d'),{type:'doughnut',data:{labels:['Spotify','Apple','Amazon','Deezer'],datasets:[{data:[184000,82000,63000,55000],backgroundColor:['#1DB954','#FC3C44','#FF9900','#EF5466'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const arc=document.getElementById('artistRevChart');
+  if(arc&&!CHARTS.arc){
+    const _key=yearToKey(curArtistYear);
+    const _sorted=[...ARTISTS].sort((a,b)=>(b[_key]||0)-(a[_key]||0));
+    const _colors=_sorted.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.arc=new Chart(arc.getContext('2d'),{type:'bar',data:{labels:_sorted.map(a=>a.name),datasets:[{label:'CA Streaming',data:_sorted.map(a=>a[_key]||0),backgroundColor:_colors.map(c=>c+'bb'),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const apie=document.getElementById('artistPieChart');
+  if(apie&&!CHARTS.apie){
+    const _key2=yearToKey(curArtistYear);
+    const _sorted2=[...ARTISTS].sort((a,b)=>(b[_key2]||0)-(a[_key2]||0));
+    const _colors2=_sorted2.map(a=>LM[a.label]?.color||'#6a6a86');
+    CHARTS.apie=new Chart(apie.getContext('2d'),{type:'doughnut',data:{labels:_sorted2.map(a=>a.name),datasets:[{data:_sorted2.map(a=>a[_key2]||0),backgroundColor:_colors2,borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+
+  const lrc=document.getElementById('labelRevChart');
+  if(lrc&&!CHARTS.lrc){CHARTS.lrc=new Chart(lrc.getContext('2d'),{type:'bar',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{label:'CA Streaming',data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['rgba(232,255,71,.75)','rgba(124,92,252,.75)','rgba(0,212,170,.75)','rgba(255,159,67,.75)','rgba(107,107,134,.5)'],borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#232332'},ticks:{callback:v=>'€'+fmtK(v)}}}}});}
+
+  const lpie=document.getElementById('labelPieChart');
+  if(lpie&&!CHARTS.lpie){CHARTS.lpie=new Chart(lpie.getContext('2d'),{type:'doughnut',data:{labels:LABELS_DATA.map(l=>l.name),datasets:[{data:LABELS_DATA.map(l=>l.streaming),backgroundColor:['#e8ff47','#7c5cfc','#00d4aa','#ff9f43','#6a6a86'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{padding:12,font:{family:'DM Mono',size:10}}}}}});}
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const PAGE_TITLES={overview:'Vue globale',alerts:'Alertes',streams:'Streams',revenues:'Revenus',tracks:'Tracks · Objectifs',artists:'Artistes · CA Streaming',labels:'Labels · Streaming',platforms:'Plateformes',objectives:'Objectifs',import:'Import data'};
+
+function sp(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const panel=document.getElementById('panel-'+id);if(panel)panel.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('page-title').textContent=PAGE_TITLES[id]||id;
+  if(id==='tracks')    buildTracksTable();
+  if(id==='streams')   {refreshStreamsPanel();setTimeout(initCharts,80);}
+  if(id==='revenues'){refreshRevPanel();setTimeout(initCharts,80);}
+  if(id==='artists')   buildArtistsTable();
+  if(id==='labels')    buildLabelsTable();
+  if(id==='alerts')    renderAlerts();
+  if(id!=='revenues')  setTimeout(initCharts,80);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAlerts();
+  buildTracksTable();
+  setTimeout(initCharts,80);
+});
+</script>
+</body>
+</html>
