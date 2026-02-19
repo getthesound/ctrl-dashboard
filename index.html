@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTRL — Label Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --border: #ffffff0f;
+  --border2: #ffffff1a;
+  --accent: #c8ff00;
+  --accent2: #7c5cfc;
+  --accent3: #ff4d6d;
+  --text: #f0f0f8;
+  --text2: #8888aa;
+  --text3: #4a4a66;
+  --green: #00d4aa;
+  --red: #ff4d6d;
+  --yellow: #ffb800;
+  --font: 'Syne', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; gap: 20px;
+}
+#loader-title { font-size: 56px; font-weight: 800; letter-spacing: 8px; color: var(--accent); }
+#loader-sub { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 3px; }
+#loader-bar { width: 240px; height: 2px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+#loader-bar-inner { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); animation: load 1.6s ease-in-out infinite; }
+@keyframes load { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
+
+/* ── APP SHELL ── */
+#app { display: none; flex-direction: column; height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; gap: 0;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px; position: sticky; top: 0; z-index: 100;
+  flex-shrink: 0;
+}
+.logo { font-size: 22px; font-weight: 800; letter-spacing: 5px; color: var(--accent); margin-right: 32px; }
+
+/* ── NAV TABS ── */
+nav { display: flex; gap: 2px; flex: 1; }
+nav button {
+  background: none; border: none; color: var(--text3); font-family: var(--font);
+  font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 0 16px; height: 52px; cursor: pointer; transition: color .15s;
+  border-bottom: 2px solid transparent; position: relative; top: 1px;
+}
+nav button:hover { color: var(--text2); }
+nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── GLOBAL FILTERS ── */
+.filters {
+  display: flex; align-items: center; gap: 8px; padding: 10px 24px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; flex-shrink: 0;
+}
+.filter-select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 11px;
+  padding: 5px 10px; border-radius: 4px; cursor: pointer; outline: none;
+  appearance: none; -webkit-appearance: none;
+}
+.filter-select:focus { border-color: var(--accent2); }
+.filter-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px; }
+.filter-sep { width: 1px; height: 20px; background: var(--border2); }
+.compare-toggle {
+  display: flex; align-items: center; gap: 6px; margin-left: auto;
+  font-family: var(--mono); font-size: 11px; color: var(--text2); cursor: pointer;
+}
+.toggle-switch {
+  width: 32px; height: 18px; background: var(--surface2); border-radius: 9px;
+  position: relative; transition: background .2s; border: 1px solid var(--border2);
+}
+.toggle-switch.on { background: var(--accent2); border-color: var(--accent2); }
+.toggle-switch::after {
+  content: ''; position: absolute; width: 12px; height: 12px;
+  background: white; border-radius: 50%; top: 2px; left: 2px; transition: left .2s;
+}
+.toggle-switch.on::after { left: 16px; }
+
+/* ── MAIN CONTENT ── */
+main { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── KPI GRID ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px 20px;
+  transition: border-color .2s;
+}
+.kpi-card:hover { border-color: var(--border2); }
+.kpi-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+.kpi-sub { font-family: var(--mono); font-size: 11px; margin-top: 6px; }
+.kpi-up { color: var(--green); }
+.kpi-down { color: var(--red); }
+.kpi-neutral { color: var(--text3); }
+
+/* ── CHARTS ROW ── */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 24px; }
+.charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+}
+.chart-title {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;
+}
+.chart-wrap { position: relative; }
+
+/* ── TABLES ── */
+.table-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; margin-bottom: 12px;
+}
+.table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+}
+.table-title { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 1px; text-transform: uppercase; text-align: left;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; white-space: nowrap; user-select: none;
+}
+th:hover { color: var(--text2); }
+th.sorted-asc::after { content: ' ↑'; color: var(--accent); }
+th.sorted-desc::after { content: ' ↓'; color: var(--accent); }
+td { padding: 10px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.td-num { font-family: var(--mono); font-size: 12px; text-align: right; }
+.td-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
+}
+.badge-gts { background: #c8ff0018; color: var(--accent); border: 1px solid #c8ff0033; }
+.badge-echo { background: #7c5cfc18; color: var(--accent2); border: 1px solid #7c5cfc33; }
+.badge-kimono { background: #ff4d6d18; color: var(--accent3); border: 1px solid #ff4d6d33; }
+.badge-willow { background: #00d4aa18; color: var(--green); border: 1px solid #00d4aa33; }
+.badge-avorio { background: #ffb80018; color: var(--yellow); border: 1px solid #ffb80033; }
+.bar-inline {
+  display: flex; align-items: center; gap: 8px;
+}
+.bar-fill {
+  height: 4px; background: var(--accent2); border-radius: 2px; min-width: 2px;
+}
+.var-pos { color: var(--green); font-family: var(--mono); font-size: 11px; }
+.var-neg { color: var(--red); font-family: var(--mono); font-size: 11px; }
+
+/* ── TOP 5 LISTS ── */
+.top5-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.top5-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.top5-title { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; }
+.top5-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.top5-item:last-child { border-bottom: none; }
+.top5-rank { font-family: var(--mono); font-size: 11px; color: var(--text3); width: 20px; }
+.top5-name { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.top5-val { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+/* ── SECTION TITLE ── */
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; margin-top: 28px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.section-title:first-child { margin-top: 0; }
+
+/* ── GROUPBY BAR ── */
+.groupby-bar { display: flex; gap: 4px; margin-bottom: 16px; }
+.groupby-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); font-family: var(--mono); font-size: 10px;
+  padding: 4px 12px; border-radius: 3px; cursor: pointer; letter-spacing: 1px;
+  transition: all .15s;
+}
+.groupby-btn:hover { color: var(--text2); }
+.groupby-btn.active { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+/* ── ARTIST SELECT ── */
+.artist-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.artist-selector select { flex: 1; max-width: 320px; }
+
+/* ── ANOMALY CARDS ── */
+.anomaly-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.anomaly-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px 16px;
+}
+.anomaly-type { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; margin-bottom: 6px; }
+.anomaly-warn { color: var(--yellow); }
+.anomaly-ok { color: var(--green); }
+.anomaly-err { color: var(--red); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+  .top5-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div id="loader-title">CTRL</div>
+  <div id="loader-sub">Chargement des données...</div>
+  <div id="loader-bar"><div id="loader-bar-inner"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">CTRL</div>
+    <nav>
+      <button class="active" onclick="showPanel('overview')">Overview</button>
+      <button onclick="showPanel('revenues')">Revenus</button>
+      <button onclick="showPanel('streams')">Streams</button>
+      <button onclick="showPanel('labels')">Labels</button>
+      <button onclick="showPanel('artists')">Artistes</button>
+    </nav>
+  </header>
+
+  <!-- GLOBAL FILTERS -->
+  <div class="filters">
+    <span class="filter-label">Année</span>
+    <select class="filter-select" id="f-year" onchange="applyFilters()"></select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Période</span>
+    <select class="filter-select" id="f-gran" onchange="applyFilters()">
+      <option value="month">Mensuel</option>
+      <option value="quarter">Trimestriel</option>
+      <option value="year">Annuel</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Label</span>
+    <select class="filter-select" id="f-label" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Distributeur</span>
+    <select class="filter-select" id="f-distrib" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Plateforme</span>
+    <select class="filter-select" id="f-platform" onchange="applyFilters()">
+      <option value="all">Toutes</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Pays</span>
+    <select class="filter-select" id="f-country" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+    <div class="compare-toggle" onclick="toggleCompare()">
+      <div class="toggle-switch" id="compare-toggle"></div>
+      <span>N vs N-1</span>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OVERVIEW -->
+    <div id="panel-overview" class="panel active">
+      <div class="kpi-grid" id="ov-kpis"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Streams & Revenus — évolution mensuelle</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-ov-main"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Mix revenus par distributeur</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-ov-distrib"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Top plateformes — streams</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-ov-platforms"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top pays — revenus</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-ov-countries"></canvas></div>
+        </div>
+      </div>
+      <div class="top5-grid">
+        <div class="top5-card">
+          <div class="top5-title">Top 5 Artistes — Revenus</div>
+          <div id="top5-artists-rev"></div>
+        </div>
+        <div class="top5-card">
+          <div class="top5-title">Top 5 Tracks — Streams</div>
+          <div id="top5-tracks-streams"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUES -->
+    <div id="panel-revenues" class="panel">
+      <div class="section-title">Revenus streaming par distributeur</div>
+      <div class="kpi-grid" id="rev-kpis"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Évolution revenus par distributeur</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-rev-distrib"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Répartition annuelle</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-rev-bar"></canvas></div>
+        </div>
+      </div>
+      <div class="section-title">Drill-down</div>
+      <div class="groupby-bar">
+        <button class="groupby-btn active" onclick="setGroupBy('distributor')">Distributeur</button>
+        <button class="groupby-btn" onclick="setGroupBy('label')">Label</button>
+        <button class="groupby-btn" onclick="setGroupBy('artist')">Artiste</button>
+        <button class="groupby-btn" onclick="setGroupBy('platform')">Plateforme</button>
+        <button class="groupby-btn" onclick="setGroupBy('country')">Pays</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title" id="rev-table-title">Par distributeur</div>
+        </div>
+        <div class="table-wrap"><table id="rev-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+      <div class="section-title">Qualité & Anomalies</div>
+      <div class="anomaly-grid" id="rev-anomalies"></div>
+    </div>
+
+    <!-- STREAMS -->
+    <div id="panel-streams" class="panel">
+      <div class="kpi-grid" id="str-kpis"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Streams par plateforme — mensuel</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-str-monthly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Part des plateformes</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-str-platforms"></canvas></div>
+        </div>
+      </div>
+      <div class="section-title">Top Tracks</div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Tracks — streams & revenus</div></div>
+        <div class="table-wrap"><table id="str-tracks-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+      <div class="section-title">Top Pays — Streams</div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Pays</div></div>
+        <div class="table-wrap"><table id="str-countries-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- LABELS -->
+    <div id="panel-labels" class="panel">
+      <div class="kpi-grid" id="lbl-kpis"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Revenus par label — évolution</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-lbl-rev"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Streams par label — évolution</div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-lbl-str"></canvas></div>
+        </div>
+      </div>
+      <div class="section-title">Performance Labels</div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Label Performance</div></div>
+        <div class="table-wrap"><table id="lbl-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ARTISTS -->
+    <div id="panel-artists" class="panel">
+      <div class="artist-selector">
+        <span class="filter-label">Artiste</span>
+        <select class="filter-select" id="artist-select" onchange="buildArtistProfile()" style="min-width:240px"></select>
+      </div>
+      <div class="kpi-grid" id="art-kpis"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Revenus — évolution</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-art-rev"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Streams — évolution</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="chart-art-str"></canvas></div>
+        </div>
+      </div>
+      <div class="section-title">Tracks de l'artiste</div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">Discographie</div></div>
+        <div class="table-wrap"><table id="art-tracks-table"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://ppakgjjdebdrgactqfed.supabase.co/storage/v1/object/public/ctrl-data/data.json';
+
+const LABEL_COLORS = {
+  'Get The Sound': '#c8ff00',
+  'Echo':          '#7c5cfc',
+  'Kimono':        '#ff4d6d',
+  'Willow':        '#00d4aa',
+  'Avorio':        '#ffb800',
+};
+const DISTRIB_COLORS = {
+  'Believe':   '#c8ff00',
+  'Tunecore':  '#7c5cfc',
+  'Alterk':    '#ff4d6d',
+  'Universal': '#ffb800',
+};
+const PLATFORM_COLORS = {
+  'Spotify':       '#1DB954',
+  'Apple Music':   '#fc3c44',
+  'Deezer':        '#ef5466',
+  'Amazon':        '#ff9900',
+  'YouTube Music': '#ff0000',
+  'Tidal':         '#00ffff',
+  'SoundCloud':    '#ff5500',
+  'Pandora':       '#3668ff',
+};
+
+// Chart.js defaults
+Chart.defaults.color = '#8888aa';
+Chart.defaults.borderColor = '#ffffff0f';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let D = null; // raw data
+let filters = { year: '2024', gran: 'month', label: 'all', distrib: 'all', platform: 'all', country: 'all' };
+let compareMode = false;
+let revGroupBy = 'distributor';
+let sortState = {};
+let charts = {};
+let currentPanel = 'overview';
+
+// ── LOAD DATA ────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch(SUPABASE_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    D = await res.json();
+    initFilters();
+    showApp();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('loader-sub').textContent = 'Erreur : ' + e.message;
+  }
+}
+
+function showApp() {
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+const fmt = n => '€' + (n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : n.toFixed(0));
+const fmtFull = n => '€' + n.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtS = n => n >= 1e9 ? (n/1e9).toFixed(2)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : n.toString();
+const fmtPct = n => (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+const rpm = (r, s) => s > 0 ? (r / s * 1000) : 0;
+const varClass = v => v > 0 ? 'var-pos' : v < 0 ? 'var-neg' : '';
+const varSign = v => (v > 0 ? '▲ +' : v < 0 ? '▼ ' : '') + Math.abs(v).toFixed(1) + '%';
+
+function labelBadge(label) {
+  const cls = {
+    'Get The Sound': 'badge-gts', 'Echo': 'badge-echo',
+    'Kimono': 'badge-kimono', 'Willow': 'badge-willow', 'Avorio': 'badge-avorio'
+  }[label] || '';
+  return `<span class="td-badge ${cls}">${label || '—'}</span>`;
+}
+
+// Get periods for current filters
+function getPeriods() {
+  const yr = filters.year;
+  const gran = filters.gran;
+  if (gran === 'year') {
+    return yr === 'all' ? Object.keys(D.y).sort() : [yr];
+  }
+  if (gran === 'quarter') {
+    return Object.keys(D.q).filter(k => yr === 'all' || k.startsWith(yr)).sort();
+  }
+  return Object.keys(D.m).filter(k => yr === 'all' || k.startsWith(yr)).sort();
+}
+
+function getPrevPeriods() {
+  const yr = filters.year;
+  if (yr === 'all') return [];
+  const prevYr = String(+yr - 1);
+  const gran = filters.gran;
+  if (gran === 'year') return [prevYr];
+  if (gran === 'quarter') return Object.keys(D.q).filter(k => k.startsWith(prevYr)).sort();
+  return Object.keys(D.m).filter(k => k.startsWith(prevYr)).sort();
+}
+
+function getSource() {
+  return filters.gran === 'year' ? D.y : filters.gran === 'quarter' ? D.q : D.m;
+}
+
+function aggPeriods(periods) {
+  const src = getSource();
+  let r=0, s=0, vv=0, vr=0;
+  const bd={}, dp={}, ar={}, lb={}, co={}, cs={};
+  const trMap={};
+  periods.forEach(p => {
+    const d = src[p]; if (!d) return;
+    r += d.r||0; s += d.s||0; vv += d.vv||0; vr += d.vr||0;
+    Object.entries(d.bd||{}).forEach(([k,v]) => { if(filters.distrib==='all'||k===filters.distrib) bd[k]=(bd[k]||0)+v; });
+    Object.entries(d.dp||{}).forEach(([k,v]) => { if(filters.platform==='all'||k===filters.platform) dp[k]=(dp[k]||0)+v; });
+    Object.entries(d.ar||{}).forEach(([k,v]) => ar[k]=(ar[k]||0)+v);
+    Object.entries(d.lb||{}).forEach(([k,v]) => { if(filters.label==='all'||k===filters.label) lb[k]=(lb[k]||0)+v; });
+    Object.entries(d.co||{}).forEach(([k,v]) => { if(filters.country==='all'||k===filters.country) co[k]=(co[k]||0)+v; });
+    Object.entries(d.cs||{}).forEach(([k,v]) => cs[k]=(cs[k]||0)+v);
+    (d.tr||[]).forEach(t => {
+      const key = t.t+'||'+t.a;
+      if (!trMap[key]) trMap[key]={t:t.t,a:t.a,r:0,s:0,i:t.i,l:t.l};
+      trMap[key].r+=t.r; trMap[key].s+=t.s;
+    });
+  });
+  // Apply label filter to totals
+  if (filters.label !== 'all') {
+    r = lb[filters.label] || 0;
+  }
+  if (filters.distrib !== 'all') {
+    r = bd[filters.distrib] || 0;
+  }
+  return { r, s, vv, vr, bd, dp, ar, lb, co, cs, tr: Object.values(trMap) };
+}
+
+// ── INIT FILTERS ─────────────────────────────────────────────────────────────
+function initFilters() {
+  // Years
+  const years = Object.keys(D.y).sort().reverse();
+  const fyear = document.getElementById('f-year');
+  fyear.innerHTML = '<option value="all">Toutes</option>' +
+    years.map(y => `<option value="${y}" ${y==='2024'?'selected':''}>${y}</option>`).join('');
+  filters.year = '2024';
+
+  // Labels
+  const labels = new Set();
+  Object.values(D.m).forEach(m => Object.keys(m.lb||{}).forEach(l => labels.add(l)));
+  const flabel = document.getElementById('f-label');
+  flabel.innerHTML = '<option value="all">Tous</option>' +
+    [...labels].sort().map(l => `<option value="${l}">${l}</option>`).join('');
+
+  // Distribs
+  const distribs = new Set();
+  Object.values(D.m).forEach(m => Object.keys(m.bd||{}).forEach(d => distribs.add(d)));
+  const fdistrib = document.getElementById('f-distrib');
+  fdistrib.innerHTML = '<option value="all">Tous</option>' +
+    [...distribs].sort().map(d => `<option value="${d}">${d}</option>`).join('');
+
+  // Platforms
+  const platforms = new Set();
+  Object.values(D.m).forEach(m => Object.keys(m.dp||{}).forEach(p => platforms.add(p)));
+  const fplatform = document.getElementById('f-platform');
+  fplatform.innerHTML = '<option value="all">Toutes</option>' +
+    [...platforms].sort().map(p => `<option value="${p}">${p}</option>`).join('');
+
+  // Countries
+  const countries = new Set();
+  Object.values(D.m).forEach(m => Object.keys(m.co||{}).forEach(c => countries.add(c)));
+  const fcountry = document.getElementById('f-country');
+  fcountry.innerHTML = '<option value="all">Tous</option>' +
+    [...countries].sort().map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // Artist select
+  const artists = new Set();
+  Object.values(D.m).forEach(m => Object.keys(m.ar||{}).forEach(a => artists.add(a)));
+  const asel = document.getElementById('artist-select');
+  asel.innerHTML = [...artists].sort().map(a => `<option value="${a}">${a}</option>`).join('');
+}
+
+// ── FILTERS ──────────────────────────────────────────────────────────────────
+function applyFilters() {
+  filters.year = document.getElementById('f-year').value;
+  filters.gran = document.getElementById('f-gran').value;
+  filters.label = document.getElementById('f-label').value;
+  filters.distrib = document.getElementById('f-distrib').value;
+  filters.platform = document.getElementById('f-platform').value;
+  filters.country = document.getElementById('f-country').value;
+  refreshPanel();
+}
+
+function toggleCompare() {
+  compareMode = !compareMode;
+  const t = document.getElementById('compare-toggle');
+  t.classList.toggle('on', compareMode);
+  refreshPanel();
+}
+
+function setGroupBy(g) {
+  revGroupBy = g;
+  document.querySelectorAll('.groupby-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  buildRevTable();
+}
+
+// ── PANELS ───────────────────────────────────────────────────────────────────
+function showPanel(name) {
+  currentPanel = name;
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  refreshPanel();
+}
+
+function refreshPanel() {
+  if (currentPanel === 'overview') buildOverview();
+  else if (currentPanel === 'revenues') buildRevenues();
+  else if (currentPanel === 'streams') buildStreams();
+  else if (currentPanel === 'labels') buildLabels();
+  else if (currentPanel === 'artists') buildArtistProfile();
+}
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ── OVERVIEW ─────────────────────────────────────────────────────────────────
+function buildOverview() {
+  const periods = getPeriods();
+  const prev = getPrevPeriods();
+  const cur = aggPeriods(periods);
+  const prv = prev.length ? aggPeriods(prev) : null;
+
+  const rpmVal = rpm(cur.r, cur.s);
+  const prevRpm = prv ? rpm(prv.r, prv.s) : 0;
+  const rVar = prv && prv.r ? (cur.r - prv.r) / prv.r * 100 : null;
+  const sVar = prv && prv.s ? (cur.s - prv.s) / prv.s * 100 : null;
+
+  // Count active artists (revenue > 0)
+  const activeArtists = Object.values(cur.ar).filter(v => v > 0).length;
+  const activeTracks = cur.tr.filter(t => t.r > 0).length;
+
+  document.getElementById('ov-kpis').innerHTML = `
+    ${kpiCard('Revenus', fmt(cur.r), rVar != null ? varSign(rVar) : '', rVar)}
+    ${kpiCard('Streams audio', fmtS(cur.s), sVar != null ? varSign(sVar) : '', sVar)}
+    ${kpiCard('RPM', '€' + rpmVal.toFixed(3), prv ? varSign(rpmVal - prevRpm) + '/1K' : '', rpmVal - prevRpm)}
+    ${kpiCard('Artistes actifs', activeArtists, '', null)}
+    ${kpiCard('Tracks', activeTracks, '', null)}
+    ${kpiCard('Labels', Object.keys(cur.lb).length, '', null)}
+  `;
+
+  // Main chart: streams + revenue by period
+  const src = getSource();
+  const labels = periods;
+  const revData = periods.map(p => src[p]?.r || 0);
+  const strData = periods.map(p => src[p]?.s || 0);
+  destroyChart('ov-main');
+  charts['ov-main'] = new Chart(document.getElementById('chart-ov-main'), {
+    data: {
+      labels: labels.map(formatPeriodLabel),
+      datasets: [
+        { type: 'line', label: 'Revenus €', data: revData, borderColor: '#c8ff00', backgroundColor: '#c8ff0018', yAxisID: 'y', tension: 0.4, pointRadius: 2, borderWidth: 2, fill: true },
+        { type: 'bar', label: 'Streams', data: strData, backgroundColor: '#7c5cfc40', borderColor: '#7c5cfc', borderWidth: 1, yAxisID: 'y2' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 16 } } },
+      scales: {
+        x: { grid: { color: '#ffffff08' }, ticks: { maxTicksLimit: 12 } },
+        y: { position: 'left', grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } },
+        y2: { position: 'right', grid: { display: false }, ticks: { callback: v => fmtS(v) } },
+      }
+    }
+  });
+
+  // Distrib pie
+  const distribEntries = Object.entries(cur.bd).sort((a,b) => b[1]-a[1]);
+  destroyChart('ov-distrib');
+  charts['ov-distrib'] = new Chart(document.getElementById('chart-ov-distrib'), {
+    type: 'doughnut',
+    data: {
+      labels: distribEntries.map(([k]) => k),
+      datasets: [{ data: distribEntries.map(([,v]) => v), backgroundColor: distribEntries.map(([k]) => DISTRIB_COLORS[k] || '#555577'), borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 12 } } } }
+  });
+
+  // Platforms bar
+  const platEntries = Object.entries(cur.dp).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  destroyChart('ov-platforms');
+  charts['ov-platforms'] = new Chart(document.getElementById('chart-ov-platforms'), {
+    type: 'bar',
+    data: {
+      labels: platEntries.map(([k]) => k),
+      datasets: [{ data: platEntries.map(([,v]) => v), backgroundColor: platEntries.map(([k]) => PLATFORM_COLORS[k] || '#7c5cfc'), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } }, y: { grid: { display: false } } } }
+  });
+
+  // Countries bar
+  const countryEntries = Object.entries(cur.co).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  destroyChart('ov-countries');
+  charts['ov-countries'] = new Chart(document.getElementById('chart-ov-countries'), {
+    type: 'bar',
+    data: {
+      labels: countryEntries.map(([k]) => k),
+      datasets: [{ data: countryEntries.map(([,v]) => v), backgroundColor: '#ff4d6d80', borderColor: '#ff4d6d', borderWidth: 1 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } }, y: { grid: { display: false } } } }
+  });
+
+  // Top 5 artists by revenue
+  const top5ar = Object.entries(cur.ar).sort((a,b) => b[1]-a[1]).slice(0,5);
+  document.getElementById('top5-artists-rev').innerHTML = top5ar.map(([name,val], i) =>
+    `<div class="top5-item"><span class="top5-rank">${i+1}</span><span class="top5-name">${name}</span><span class="top5-val">${fmt(val)}</span></div>`
+  ).join('');
+
+  // Top 5 tracks by streams
+  const top5tr = cur.tr.sort((a,b) => b.s-a.s).slice(0,5);
+  document.getElementById('top5-tracks-streams').innerHTML = top5tr.map((t, i) =>
+    `<div class="top5-item"><span class="top5-rank">${i+1}</span><span class="top5-name">${t.t} <small style="color:var(--text3)">${t.a}</small></span><span class="top5-val">${fmtS(t.s)}</span></div>`
+  ).join('');
+}
+
+function kpiCard(label, value, sub, varVal) {
+  const cls = varVal == null ? 'kpi-neutral' : varVal > 0 ? 'kpi-up' : varVal < 0 ? 'kpi-down' : 'kpi-neutral';
+  return `<div class="kpi-card">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-value">${value}</div>
+    ${sub ? `<div class="kpi-sub ${cls}">${sub}</div>` : ''}
+  </div>`;
+}
+
+function formatPeriodLabel(p) {
+  if (p.includes('Q')) return p;
+  if (p.length === 4) return p;
+  const [y, m] = p.split('-');
+  const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  return months[+m-1] + ' ' + y.slice(2);
+}
+
+// ── REVENUES ─────────────────────────────────────────────────────────────────
+function buildRevenues() {
+  const periods = getPeriods();
+  const prev = getPrevPeriods();
+  const cur = aggPeriods(periods);
+  const prv = prev.length ? aggPeriods(prev) : null;
+  const rVar = prv && prv.r ? (cur.r - prv.r) / prv.r * 100 : null;
+
+  document.getElementById('rev-kpis').innerHTML = `
+    ${kpiCard('Revenus total', fmtFull(cur.r), rVar != null ? varSign(rVar) + ' vs N-1' : '', rVar)}
+    ${kpiCard('RPM', '€' + rpm(cur.r, cur.s).toFixed(4), 'revenus/1K streams', null)}
+    ${kpiCard('Streams audio', fmtS(cur.s), '', null)}
+    ${kpiCard('Revenus vidéo', fmt(cur.vr), 'YouTube/Facebook', null)}
+  `;
+
+  // Stacked area by distributor over time
+  const src = getSource();
+  const distribs = [...new Set(Object.values(D.m).flatMap(m => Object.keys(m.bd||{})))].sort();
+  destroyChart('rev-distrib');
+  charts['rev-distrib'] = new Chart(document.getElementById('chart-rev-distrib'), {
+    type: 'line',
+    data: {
+      labels: periods.map(formatPeriodLabel),
+      datasets: distribs.map(dist => ({
+        label: dist,
+        data: periods.map(p => src[p]?.bd?.[dist] || 0),
+        borderColor: DISTRIB_COLORS[dist] || '#555577',
+        backgroundColor: (DISTRIB_COLORS[dist] || '#555577') + '22',
+        borderWidth: 2, tension: 0.4, pointRadius: 1, fill: true
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } }, scales: { x: { grid: { color: '#ffffff08' }, stacked: false }, y: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } } } }
+  });
+
+  // Bar per year
+  const years = Object.keys(D.y).sort();
+  const distribColors = distribs.map(d => DISTRIB_COLORS[d] || '#555577');
+  destroyChart('rev-bar');
+  charts['rev-bar'] = new Chart(document.getElementById('chart-rev-bar'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: distribs.map((dist, i) => ({
+        label: dist,
+        data: years.map(y => D.y[y]?.bd?.[dist] || 0),
+        backgroundColor: (DISTRIB_COLORS[dist] || '#555577') + 'cc',
+        borderWidth: 0,
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } } } }
+  });
+
+  buildRevTable();
+  buildAnomalies(cur, periods);
+}
+
+function buildRevTable() {
+  const periods = getPeriods();
+  const prev = getPrevPeriods();
+  const cur = aggPeriods(periods);
+  const prv = prev.length ? aggPeriods(prev) : null;
+  const src = getSource();
+
+  let rows = [];
+  const titles = {
+    distributor: ['Distributeur','Revenus','Streams','RPM','Var N-1'],
+    label: ['Label','Revenus','Streams','RPM','Var N-1'],
+    artist: ['Artiste','Revenus','Streams','RPM','Label'],
+    platform: ['Plateforme','Revenus','Part %'],
+    country: ['Pays','Revenus','Streams','Part %'],
+  };
+
+  document.getElementById('rev-table-title').textContent = 'Par ' + revGroupBy;
+
+  const thead = document.querySelector('#rev-table thead');
+  const tbody = document.querySelector('#rev-table tbody');
+  thead.innerHTML = '<tr>' + (titles[revGroupBy]||[]).map(t => `<th>${t}</th>`).join('') + '</tr>';
+
+  if (revGroupBy === 'distributor') {
+    rows = Object.entries(cur.bd).map(([k,v]) => {
+      const s = periods.reduce((a,p) => a + (src[p]?.bd?.[k]||0), 0) / cur.r * cur.s; // approx
+      const pv = prv?.bd?.[k] || 0;
+      const vr = pv ? (v - pv)/pv*100 : null;
+      return { name: k, r: v, s: cur.s, rpm: rpm(v, cur.s), var: vr };
+    }).sort((a,b) => b.r - a.r);
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td>${r.name}</td>
+      <td class="td-num">${fmtFull(r.r)}</td>
+      <td class="td-num">${fmtS(r.s)}</td>
+      <td class="td-num">€${rpm(r.r, r.s).toFixed(3)}</td>
+      <td class="td-num ${varClass(r.var)}">${r.var != null ? varSign(r.var) : '—'}</td>
+    </tr>`).join('');
+  } else if (revGroupBy === 'label') {
+    rows = Object.entries(cur.lb).map(([k,v]) => {
+      const pv = prv?.lb?.[k] || 0;
+      const vr = pv ? (v-pv)/pv*100 : null;
+      return { name: k, r: v, var: vr };
+    }).sort((a,b) => b.r - a.r);
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td>${labelBadge(r.name)}</td>
+      <td class="td-num">${fmtFull(r.r)}</td>
+      <td class="td-num">—</td>
+      <td class="td-num">—</td>
+      <td class="td-num ${varClass(r.var)}">${r.var != null ? varSign(r.var) : '—'}</td>
+    </tr>`).join('');
+  } else if (revGroupBy === 'artist') {
+    rows = Object.entries(cur.ar).sort((a,b) => b[1]-a[1]).slice(0, 50);
+    const totalRev = cur.r;
+    tbody.innerHTML = rows.map(([name, v]) => {
+      const track = cur.tr.find(t => t.a === name);
+      return `<tr>
+        <td>${name}</td>
+        <td class="td-num">${fmtFull(v)}</td>
+        <td class="td-num">${fmtPct(v/totalRev*100)}</td>
+        <td class="td-num">€${rpm(v, cur.s * v/totalRev).toFixed(3)}</td>
+        <td>${labelBadge(track?.l || '')}</td>
+      </tr>`;
+    }).join('');
+  } else if (revGroupBy === 'platform') {
+    const total = Object.values(cur.dp).reduce((a,v)=>a+v,0);
+    rows = Object.entries(cur.dp).sort((a,b)=>b[1]-a[1]);
+    tbody.innerHTML = rows.map(([k,v]) => `<tr>
+      <td>${k}</td>
+      <td class="td-num">${fmtFull(v)}</td>
+      <td class="td-num">
+        <div class="bar-inline">
+          <div class="bar-fill" style="width:${Math.max(2, v/total*120)}px;background:${PLATFORM_COLORS[k]||'#7c5cfc'}"></div>
+          ${(v/total*100).toFixed(1)}%
+        </div>
+      </td>
+    </tr>`).join('');
+  } else if (revGroupBy === 'country') {
+    const total = Object.values(cur.co).reduce((a,v)=>a+v,0);
+    rows = Object.entries(cur.co).sort((a,b)=>b[1]-a[1]).slice(0, 50);
+    tbody.innerHTML = rows.map(([k,v]) => `<tr>
+      <td>${k}</td>
+      <td class="td-num">${fmtFull(v)}</td>
+      <td class="td-num">${fmtS(cur.cs?.[k]||0)}</td>
+      <td class="td-num">
+        <div class="bar-inline">
+          <div class="bar-fill" style="width:${Math.max(2,v/total*120)}px"></div>
+          ${(v/total*100).toFixed(1)}%
+        </div>
+      </td>
+    </tr>`).join('');
+  }
+}
+
+function buildAnomalies(cur, periods) {
+  const src = getSource();
+  const anomalies = [];
+  const rpmVal = rpm(cur.r, cur.s);
+
+  // Check RPM anomaly
+  if (rpmVal > 10) anomalies.push({ type: 'warn', msg: `RPM élevé : €${rpmVal.toFixed(3)}/1K streams` });
+  else if (rpmVal < 0.5 && cur.s > 10000) anomalies.push({ type: 'warn', msg: `RPM faible : €${rpmVal.toFixed(3)}/1K streams` });
+  else anomalies.push({ type: 'ok', msg: `RPM normal : €${rpmVal.toFixed(3)}/1K streams` });
+
+  // Missing periods
+  const allMonths = Object.keys(D.m).sort();
+  const firstMonth = allMonths[0];
+  const lastMonth = allMonths[allMonths.length-1];
+  const [fy, fm] = firstMonth.split('-').map(Number);
+  const [ly, lm] = lastMonth.split('-').map(Number);
+  let expected = 0, cur_y = fy, cur_m = fm;
+  while (cur_y < ly || (cur_y === ly && cur_m <= lm)) {
+    expected++;
+    cur_m++; if (cur_m > 12) { cur_m = 1; cur_y++; }
+  }
+  const missing = expected - allMonths.length;
+  if (missing > 0) anomalies.push({ type: 'warn', msg: `${missing} mois manquants dans les données` });
+  else anomalies.push({ type: 'ok', msg: `Couverture complète : ${allMonths.length} mois` });
+
+  // Distrib count
+  const nDistrib = Object.keys(cur.bd).length;
+  anomalies.push({ type: 'ok', msg: `${nDistrib} distributeurs actifs` });
+
+  // Country coverage
+  anomalies.push({ type: 'ok', msg: `${Object.keys(cur.co).length} pays avec revenus` });
+
+  const cls = { warn: 'anomaly-warn', ok: 'anomaly-ok', err: 'anomaly-err' };
+  document.getElementById('rev-anomalies').innerHTML = anomalies.map(a =>
+    `<div class="anomaly-card">
+      <div class="anomaly-type ${cls[a.type]}">${a.type === 'warn' ? '⚠ ATTENTION' : a.type === 'err' ? '✕ ERREUR' : '✓ OK'}</div>
+      <div>${a.msg}</div>
+    </div>`
+  ).join('');
+}
+
+// ── STREAMS ───────────────────────────────────────────────────────────────────
+function buildStreams() {
+  const periods = getPeriods();
+  const prev = getPrevPeriods();
+  const cur = aggPeriods(periods);
+  const prv = prev.length ? aggPeriods(prev) : null;
+  const src = getSource();
+  const sVar = prv && prv.s ? (cur.s - prv.s)/prv.s*100 : null;
+
+  document.getElementById('str-kpis').innerHTML = `
+    ${kpiCard('Streams audio', fmtS(cur.s), sVar != null ? varSign(sVar) + ' vs N-1' : '', sVar)}
+    ${kpiCard('Vues vidéo', fmtS(cur.vv), 'YouTube / Facebook / TikTok', null)}
+    ${kpiCard('Top plateforme', Object.entries(cur.dp).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—', '', null)}
+    ${kpiCard('Pays couverts', Object.keys(cur.co).length, '', null)}
+  `;
+
+  // Stacked by platform over time
+  const topPlatforms = Object.entries(cur.dp).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k])=>k);
+  destroyChart('str-monthly');
+  charts['str-monthly'] = new Chart(document.getElementById('chart-str-monthly'), {
+    type: 'line',
+    data: {
+      labels: periods.map(formatPeriodLabel),
+      datasets: topPlatforms.map(p => ({
+        label: p,
+        data: periods.map(per => src[per]?.dp?.[p] || 0),
+        borderColor: PLATFORM_COLORS[p] || '#7c5cfc',
+        backgroundColor: (PLATFORM_COLORS[p] || '#7c5cfc') + '22',
+        borderWidth: 2, tension: 0.4, pointRadius: 1, fill: false,
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } }, scales: { x: { grid: { color: '#ffffff08' } }, y: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } } } }
+  });
+
+  // Platform doughnut (by revenue)
+  const platTop = Object.entries(cur.dp).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  destroyChart('str-platforms');
+  charts['str-platforms'] = new Chart(document.getElementById('chart-str-platforms'), {
+    type: 'doughnut',
+    data: {
+      labels: platTop.map(([k])=>k),
+      datasets: [{ data: platTop.map(([,v])=>v), backgroundColor: platTop.map(([k]) => PLATFORM_COLORS[k] || '#555577'), borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, padding: 10 } } } }
+  });
+
+  // Tracks table
+  const tracks = cur.tr.sort((a,b)=>b.s-a.s).slice(0,50);
+  const tTotal = cur.s;
+  document.querySelector('#str-tracks-table thead').innerHTML = '<tr><th>Track</th><th>Artiste</th><th>Label</th><th>ISRC</th><th onclick="sortTable(\'str-tracks-table\',4)">Streams ↕</th><th onclick="sortTable(\'str-tracks-table\',5)">Revenus ↕</th><th>Part %</th></tr>';
+  document.querySelector('#str-tracks-table tbody').innerHTML = tracks.map(t => `<tr>
+    <td>${t.t}</td><td style="color:var(--text2)">${t.a}</td>
+    <td>${labelBadge(t.l)}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${t.i||'—'}</td>
+    <td class="td-num">${fmtS(t.s)}</td>
+    <td class="td-num">${fmtFull(t.r)}</td>
+    <td class="td-num"><div class="bar-inline"><div class="bar-fill" style="width:${Math.max(2,t.s/Math.max(1,tracks[0].s)*80)}px"></div>${tTotal>0?(t.s/tTotal*100).toFixed(2):'0'}%</div></td>
+  </tr>`).join('');
+
+  // Countries table
+  const coEntries = Object.entries(cur.co).sort((a,b)=>b[1]-a[1]).slice(0,30);
+  const coTotal = Object.values(cur.co).reduce((a,v)=>a+v,0);
+  document.querySelector('#str-countries-table thead').innerHTML = '<tr><th>Pays</th><th>Revenus</th><th>Streams</th><th>Part %</th></tr>';
+  document.querySelector('#str-countries-table tbody').innerHTML = coEntries.map(([k,v]) => `<tr>
+    <td>${k}</td>
+    <td class="td-num">${fmtFull(v)}</td>
+    <td class="td-num">${fmtS(cur.cs?.[k]||0)}</td>
+    <td class="td-num"><div class="bar-inline"><div class="bar-fill" style="width:${Math.max(2,v/coTotal*120)}px"></div>${(v/coTotal*100).toFixed(1)}%</div></td>
+  </tr>`).join('');
+}
+
+// ── LABELS ────────────────────────────────────────────────────────────────────
+function buildLabels() {
+  const periods = getPeriods();
+  const cur = aggPeriods(periods);
+  const years = Object.keys(D.y).sort();
+  const labels = Object.keys(LABEL_COLORS);
+
+  document.getElementById('lbl-kpis').innerHTML = labels.map(l => {
+    const v = cur.lb[l] || 0;
+    return kpiCard(l, fmt(v), '', null);
+  }).join('');
+
+  destroyChart('lbl-rev');
+  charts['lbl-rev'] = new Chart(document.getElementById('chart-lbl-rev'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: labels.map(l => ({
+        label: l, data: years.map(y => D.y[y]?.lb?.[l] || 0),
+        backgroundColor: LABEL_COLORS[l] + 'cc', borderWidth: 0,
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } } } }
+  });
+
+  destroyChart('lbl-str');
+  charts['lbl-str'] = new Chart(document.getElementById('chart-lbl-str'), {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: labels.map(l => ({
+        label: l, data: years.map(y => {
+          // approximate streams per label from track data
+          const lbRev = D.y[y]?.lb?.[l] || 0;
+          const totalRev = D.y[y]?.r || 1;
+          return Math.round((lbRev / totalRev) * (D.y[y]?.s || 0));
+        }),
+        borderColor: LABEL_COLORS[l], backgroundColor: LABEL_COLORS[l]+'22',
+        borderWidth: 2, tension: 0.4, pointRadius: 3, fill: false,
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10 } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmtS(v) } } } }
+  });
+
+  // Label table
+  const thead = document.querySelector('#lbl-table thead');
+  const tbody = document.querySelector('#lbl-table tbody');
+  thead.innerHTML = '<tr><th>Label</th>' + years.slice(-5).map(y=>`<th>${y}</th>`).join('') + '<th>Total</th><th>RPM</th></tr>';
+  tbody.innerHTML = labels.map(l => {
+    const total = Object.values(D.y).reduce((a,y)=>a+(y.lb?.[l]||0),0);
+    const totalStr = Object.values(D.y).reduce((a,y)=>a+(y.s||0)*((y.lb?.[l]||0)/(y.r||1)),0);
+    return `<tr>
+      <td>${labelBadge(l)}</td>
+      ${years.slice(-5).map(y=>`<td class="td-num">${fmt(D.y[y]?.lb?.[l]||0)}</td>`).join('')}
+      <td class="td-num">${fmt(total)}</td>
+      <td class="td-num">€${rpm(total,totalStr).toFixed(3)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ARTISTS ──────────────────────────────────────────────────────────────────
+function buildArtistProfile() {
+  const artist = document.getElementById('artist-select').value;
+  if (!artist) return;
+
+  const years = Object.keys(D.y).sort();
+  const yearRevs = years.map(y => D.y[y]?.ar?.[artist] || 0);
+  const totalRev = yearRevs.reduce((a,v)=>a+v,0);
+
+  // Approximate streams per year for this artist
+  const yearStrs = years.map((y,i) => {
+    const lbRev = D.y[y]?.r || 1;
+    return Math.round((yearRevs[i] / lbRev) * (D.y[y]?.s || 0));
+  });
+  const totalStr = yearStrs.reduce((a,v)=>a+v,0);
+
+  // Tracks for this artist
+  const allTracks = {};
+  Object.values(D.m).forEach(m => {
+    (m.tr||[]).forEach(t => {
+      if (t.a !== artist) return;
+      const key = t.t;
+      if (!allTracks[key]) allTracks[key] = { t: t.t, r: 0, s: 0, i: t.i, l: t.l };
+      allTracks[key].r += t.r;
+      allTracks[key].s += t.s;
+    });
+  });
+  const tracks = Object.values(allTracks).sort((a,b)=>b.r-a.r);
+
+  // Current year
+  const yr = filters.year === 'all' ? years[years.length-1] : filters.year;
+  const curRev = D.y[yr]?.ar?.[artist] || 0;
+  const prevRev = D.y[String(+yr-1)]?.ar?.[artist] || 0;
+  const rVar = prevRev ? (curRev-prevRev)/prevRev*100 : null;
+
+  document.getElementById('art-kpis').innerHTML = `
+    ${kpiCard('Revenus total', fmt(totalRev), '', null)}
+    ${kpiCard(`Revenus ${yr}`, fmtFull(curRev), rVar != null ? varSign(rVar) + ' vs N-1' : '', rVar)}
+    ${kpiCard('Streams estimés', fmtS(totalStr), 'all-time', null)}
+    ${kpiCard('Tracks', tracks.length, '', null)}
+  `;
+
+  destroyChart('art-rev');
+  charts['art-rev'] = new Chart(document.getElementById('chart-art-rev'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [{ label: 'Revenus', data: yearRevs, backgroundColor: '#c8ff0088', borderColor: '#c8ff00', borderWidth: 1 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmt(v) } } } }
+  });
+
+  destroyChart('art-str');
+  charts['art-str'] = new Chart(document.getElementById('chart-art-str'), {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [{ label: 'Streams', data: yearStrs, borderColor: '#7c5cfc', backgroundColor: '#7c5cfc22', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 3 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#ffffff08' }, ticks: { callback: v => fmtS(v) } } } }
+  });
+
+  const thead = document.querySelector('#art-tracks-table thead');
+  const tbody = document.querySelector('#art-tracks-table tbody');
+  thead.innerHTML = '<tr><th>Track</th><th>ISRC</th><th>Label</th><th>Revenus</th><th>Streams</th><th>RPM</th></tr>';
+  tbody.innerHTML = tracks.map(t => `<tr>
+    <td>${t.t}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${t.i||'—'}</td>
+    <td>${labelBadge(t.l)}</td>
+    <td class="td-num">${fmtFull(t.r)}</td>
+    <td class="td-num">${fmtS(t.s)}</td>
+    <td class="td-num">€${rpm(t.r,t.s).toFixed(3)}</td>
+  </tr>`).join('');
+}
+
+// ── SORT TABLE ────────────────────────────────────────────────────────────────
+function sortTable(tableId, col) {
+  const table = document.getElementById(tableId);
+  const tbody = table.querySelector('tbody');
+  const rows = [...tbody.querySelectorAll('tr')];
+  const key = tableId + '_' + col;
+  const asc = sortState[key] !== true;
+  sortState[key] = asc;
+  rows.sort((a,b) => {
+    const av = a.cells[col]?.textContent?.replace(/[€%KMB,\s▲▼+]/g,'').trim() || '0';
+    const bv = b.cells[col]?.textContent?.replace(/[€%KMB,\s▲▼+]/g,'').trim() || '0';
+    return asc ? +av - +bv : +bv - +av;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ── START ─────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
